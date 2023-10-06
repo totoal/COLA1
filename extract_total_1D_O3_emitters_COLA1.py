@@ -1,16 +1,9 @@
+import os
 from lmfit import Model
-from lmfit.models import Gaussian2dModel
-import lmfit
 from astropy.io import fits
 import numpy as np
-import matplotlib
-import copy
 from astropy.convolution import convolve
-import scipy.ndimage as snd
-from astropy.convolution import Gaussian2DKernel
-from scipy.interpolate import interp1d
 import numpy
-# no need to call it pyfits, sorry about that
 from astropy.io import fits as pyfits
 from matplotlib import pyplot
 import numpy
@@ -36,13 +29,15 @@ def gaussian(x, totflux, c, x0, sigma):
 
 # if true, rescales the mean(err_1d) to be equal to the std(data_1d) with some outlier removal
 rescale_noise = False
-FOLDER = 'SPECTRA_O3_FINAL'
-SAVE_FOLDER = 'SPECTRA_O3_FINAL/OPTIMAL_PROFILES/'
-ONED_FOLDER = 'SPECTRA_O3_FINAL/ONED/'
+FOLDER = '../spectra/SPECTRA_O3_FINAL/'
+SAVE_FOLDER = '../spectra/SPECTRA_O3_FINAL/OPTIMAL_PROFILES/'
+ONED_FOLDER = '../spectra/SPECTRA_O3_FINAL/ONED/'
 
 # did_you_create_the_folders?
+os.makedirs(SAVE_FOLDER, exist_ok=True)
+os.makedirs(ONED_FOLDER, exist_ok=True)
 
-CATALOG = 'COLA1_O3_candidates_06102023.fits'
+CATALOG = '../catalogs/COLA1_O3_candidates_06102023.fits'
 FIELD = 'COLA1'
 noise_rescale = 0.8008
 
@@ -53,7 +48,7 @@ data = cat[1].data
 IDlist = data.field('NUMBER_1')  # NUMBER for other fields than J0100
 # REDO=data.field('REDO_1D')
 
-z_guesslist = data.field('z_O3doublett')
+z_guesslist = data.field('z_O3doublet')
 Nclumps_Y = data.field('Nclumps_Y')
 
 
