@@ -82,11 +82,11 @@ for q in range(len(IDlist)):
 
         # select region in 2D that contains the 5008 line ##Could also generalise to any other line
         if thisNclumps_Y == 1.:
-            sel_wav = (wav_array > 5008.24*(1+thisz) - 5008.24*(1+thisz)*300/3E5) * \
-                (wav_array < 5008.24*(1+thisz) + 5008.24*(1+thisz)*300/3E5)  # this
+            sel_wav = (wav_array > 5008.24*(1+thisz) - 5008.24*(1+thisz)*400/3E5) * \
+                (wav_array < 5008.24*(1+thisz) + 5008.24*(1+thisz)*250/3E5)  # this
         if thisNclumps_Y > 1.:
-            sel_wav = (wav_array > 5008.24*(1+thisz) - 5008.24*(1+thisz)*1000/3E5) * \
-                (wav_array < 5008.24*(1+thisz) + 5008.24*(1+thisz)*1000/3E5)  # this
+            sel_wav = (wav_array > 5008.24*(1+thisz) - 5008.24*(1+thisz)*400/3E5) * \
+                (wav_array < 5008.24*(1+thisz) + 5008.24*(1+thisz)*250/3E5)  # this
 
         subset_data = data[:, sel_wav]
         sel_real = np.isfinite(subset_data)
@@ -100,6 +100,8 @@ for q in range(len(IDlist)):
         x_fit = np.arange(0, len(collapse_y), 1)
         x_fit_oversample = np.arange(0, len(collapse_y), 0.01)
 
+        print(f'{thisNclumps_Y=}')
+
         if thisNclumps_Y == 1.:
             model = Model(gaussian, independent_vars=('x'), prefix='m1_')
             model.set_param_hint('m1_totflux', min=0., max=20)
@@ -110,8 +112,7 @@ for q in range(len(IDlist)):
             params = model.make_params(totflux=0.5, c=0, x0=26, sigma=1)
 
         if thisNclumps_Y == 2.:
-            model = Model(gaussian, independent_vars=('x'), prefix='m1_') + \
-                Model(gaussian, independent_vars=('x'), prefix='m2_')
+            model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_')
             # print(model.param_names)
             model.set_param_hint('m1_sigma', min=0.8, max=3.5)
             model.set_param_hint('m2_sigma', min=0.8, max=3.5)
@@ -121,16 +122,17 @@ for q in range(len(IDlist)):
 
             model.set_param_hint('m1_c', min=-0.5, max=0.02)
 
-            model.set_param_hint('m1_x0', min=5., max=29)
-            model.set_param_hint('m2_x0', min=21., max=36)
+            model.set_param_hint('m1_x0', min=21., max=29.)
+            model.set_param_hint('m2_x0', min=20., max=30)
 
             params = model.make_params(
                 m1_totflux=1, m1_c=0, m1_x0=22, m1_sigma=1, m2_totflux=2., m2_c=0, m2_x0=26, m2_sigma=1)
             params['m2_c'].vary = False
 
         if thisNclumps_Y == 3.:
-            model = Model(gaussian, independent_vars=('x'), prefix='m1_')+Model(gaussian,
-                                                                                independent_vars=('x'), prefix='m2_')+Model(gaussian, independent_vars=('x'), prefix='m3_')
+            model = Model(gaussian, prefix='m1_') +\
+                    Model(gaussian, prefix='m2_') +\
+                    Model(gaussian, prefix='m3_')
             # print(model.param_names)
             model.set_param_hint('m1_sigma', min=0.8, max=3.5)
             model.set_param_hint('m2_sigma', min=0.8, max=3.5)
@@ -142,9 +144,9 @@ for q in range(len(IDlist)):
 
             model.set_param_hint('m1_c', min=-0.5, max=0.5)
 
-            model.set_param_hint('m1_x0', min=22., max=28)
-            model.set_param_hint('m2_x0', min=5., max=21)
-            model.set_param_hint('m3_x0', min=26., max=38)
+            model.set_param_hint('m1_x0', min=21., max=29.)
+            model.set_param_hint('m2_x0', min=20., max=30)
+            model.set_param_hint('m3_x0', min=20., max=30)
 
             params = model.make_params(m1_totflux=2, m1_c=0, m1_x0=26, m1_sigma=2, m2_totflux=0.2,
                                        m2_c=0, m2_x0=24, m2_sigma=2, m3_totflux=0.2, m3_c=0, m3_x0=28, m3_sigma=2)
@@ -153,9 +155,10 @@ for q in range(len(IDlist)):
             params['m3_c'].vary = False
 
         if thisNclumps_Y == 4.:  # honestly this is only used for one object, id 19021
-            model = Model(gaussian, independent_vars=('x'), prefix='m1_')+Model(gaussian, independent_vars=('x'), prefix='m2_') + \
-                Model(gaussian, independent_vars=('x'), prefix='m3_') + \
-                Model(gaussian, independent_vars=('x'), prefix='m4_')
+            model = Model(gaussian, prefix='m1_') +\
+                    Model(gaussian, prefix='m2_') +\
+                    Model(gaussian, prefix='m3_') +\
+                    Model(gaussian, prefix='m4_')
             # print(model.param_names)
             model.set_param_hint('m1_sigma', min=0.8, max=3.5)
             model.set_param_hint('m2_sigma', min=0.8, max=3.5)
@@ -186,10 +189,13 @@ for q in range(len(IDlist)):
         print(result.fit_report())
 
         fig, (ax1, ax2) = pyplot.subplots(1, 2)
-        ax1.imshow(subset_data, origin='lower')
+        ax1.imshow(np.arcsinh(subset_data), origin='lower')
         ax2.plot(x_fit, collapse_y)
         ax2.plot(x_fit_oversample, model.eval(
             result.params, x=x_fit_oversample))
+        ax1.axhline(25, color='w', ls=':')
+        ax2.axvline(25, color='dimgray', ls=':')
+        ax2.set_xlim(0, 50)
         pyplot.savefig(SAVE_FOLDER+'opt_profile_fit_%s_%s_mod%s.png' %
                        (FIELD, thisID, module))
         pyplot.clf()
