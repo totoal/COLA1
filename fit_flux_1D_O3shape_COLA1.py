@@ -1,16 +1,8 @@
 from lmfit import Model
-import lmfit
 from astropy.io import fits
 import numpy as np
-import matplotlib
 import copy
-from astropy.convolution import convolve
-import scipy.ndimage as snd
-from astropy.convolution import Gaussian2DKernel
-from scipy.interpolate import interp1d
 import numpy
-# no need to call it pyfits, sorry about that
-from astropy.io import fits as pyfits
 from matplotlib import pyplot
 import numpy
 from astropy.cosmology import FlatLambdaCDM

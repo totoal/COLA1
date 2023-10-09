@@ -1,18 +1,7 @@
 from lmfit import Model
-import lmfit
 from astropy.io import fits
 import numpy as np
-import matplotlib
-import copy
-from astropy.convolution import convolve
-import scipy.ndimage as snd
-from astropy.convolution import Gaussian2DKernel
-from scipy.interpolate import interp1d
-import numpy
-# no need to call it pyfits, sorry about that
-from astropy.io import fits as pyfits
 from matplotlib import pyplot
-import numpy
 from astropy.cosmology import FlatLambdaCDM
 cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
 
@@ -24,22 +13,22 @@ def gaussian(x, totflux, c, x0, sigma):
 def gaussian_O3(x, a, c, redshift, sigma):
     x0_O31 = (1+redshift)*4960.295
     x0_O32 = (1+redshift)*5008.24
-    return c + a*(numpy.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*numpy.exp(-(x-x0_O32)**2/(2*sigma**2)))
+    return c + a*(np.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*np.exp(-(x-x0_O32)**2/(2*sigma**2)))
 
 
 def gaussian_O3_withfudge(x, a, c, redshift, sigma, fudge):
     x0_O31 = (1+redshift)*4960.295
     x0_O32 = (1+redshift)*5008.24
-    return c + a*(numpy.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*fudge*numpy.exp(-(x-x0_O32)**2/(2*sigma**2)))
+    return c + a*(np.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*fudge*np.exp(-(x-x0_O32)**2/(2*sigma**2)))
 
 
 # if true, rescales the mean(err_1d) to be equal to the std(data_1d) with some outlier removal
 rescale_noise = False
-FOLDER = 'SPECTRA_O3_FINAL/'
-SAVE_FOLDER = 'SPECTRA_O3_FINAL/OPTIMAL_PROFILES/'
-ONED_FOLDER = 'SPECTRA_O3_FINAL/ONED/'
+SAVE_FOLDER = '../spectra/SPECTRA_O3_FINAL/REDSHIFT_FIT/'
+SPECTRA_FOLDER = '../spectra/SPECTRA_O3_FINAL/ONED/'
 
-CATALOG = 'COLA1_O3_candidates_06102023.fits'
+CATALOG = '../catalogs/COLA1_O3_candidates_06102023.fits'
+SAVE_CATALOG = '../catalogs/COLA1_O3_fitted_redshift.fits'
 FIELD = 'COLA1'
 noise_rescale = 0.8008
 
@@ -56,9 +45,8 @@ IDlist = data.field('NUMBER_1')  # NUMBER for other fields than J0100
 
 
 z_guesslist = data.field('z_O3doublet')
-Nclumps_Y = data.field('Nclumps_Y')
-Nclumps_spec = data.field('Nclumps_spec')
-Modignore = data.field('Module_ignore')
+Nclumps_Y = data.field('Nclumps_spec')
+# Modignore = data.field('Module_ignore')
 
 # REDO=data.field('REDO_zspec')
 
@@ -79,10 +67,9 @@ for q in range(len(IDlist)):
     thisz = z_guesslist[q]
     print('now doing id', thisID, q)
 
-    thisNclumps_Y = Nclumps_Y[q]
-    thismod_ign = Modignore[q]
+    # thismod_ign = Modignore[q]
 
-    thisNclumps_spec = Nclumps_spec[q]
+    thisNclumps_spec = Nclumps_Y[q]
 
     # if REDO[q]==False:
     # continue
@@ -92,8 +79,8 @@ for q in range(len(IDlist)):
 
     obs_wav = data_1d.field('wavelength')  # in Angstroms
     for module in ['A', 'B']:
-        if module == thismod_ign:
-            continue
+        # if module == thismod_ign:
+        #     continue
         try:
             flux_tot = data_1d.field('flux_tot_%s' % module)
             flux_tot_err = data_1d.field('flux_tot_%s_err' % module)
@@ -105,7 +92,7 @@ for q in range(len(IDlist)):
         # print(flux_tot[sel_include],flux_tot_err[sel_include])
 
         if thisNclumps_spec == 1.:
-            model = Model(gaussian_O3_withfudge, independent_vars=('x'))
+            model = Model(gaussian_O3_withfudge)
             model.set_param_hint('a', min=0., max=200)
             model.set_param_hint('sigma', min=0.01, max=200)
             model.set_param_hint('c', min=-0.5, max=0.5)
@@ -115,8 +102,7 @@ for q in range(len(IDlist)):
                 a=0.1, c=0., redshift=thisz, sigma=10., fudge=1.0)
 
         if thisNclumps_spec == 2.:  # 2 or 4 a the moment
-            model = Model(gaussian_O3_withfudge, independent_vars=(
-                'x'), prefix='m1_') + Model(gaussian_O3_withfudge, independent_vars=('x'), prefix='m2_')
+            model = Model(gaussian_O3_withfudge, prefix='m1_') + Model(gaussian_O3_withfudge, prefix='m2_')
             model.set_param_hint('m1_a', min=0., max=200)
             model.set_param_hint('m1_sigma', min=7., max=35)
             model.set_param_hint('m1_c', min=-0.5, max=0.5)
@@ -136,8 +122,9 @@ for q in range(len(IDlist)):
             # params['m2_fudge'].vary=False
 
         if thisNclumps_spec == 3.:  # 2 or 4 a the moment
-            model = Model(gaussian_O3_withfudge, independent_vars=('x'), prefix='m1_') + Model(gaussian_O3_withfudge,
-                                                                                               independent_vars=('x'), prefix='m2_') + Model(gaussian_O3_withfudge, independent_vars=('x'), prefix='m3_')
+            model = Model(gaussian_O3_withfudge, prefix='m1_') +\
+                    Model(gaussian_O3_withfudge, prefix='m2_') +\
+                    Model(gaussian_O3_withfudge, prefix='m3_')
             model.set_param_hint('m1_a', min=0., max=200)
             model.set_param_hint('m1_sigma', min=5., max=35)
             model.set_param_hint('m1_c', min=-0.5, max=0.5)
@@ -188,7 +175,7 @@ for q in range(len(IDlist)):
         pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
                             flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
 
-        xx = numpy.arange(4920*(1+thisz), 5060*(1+thisz), 1.)
+        xx = np.arange(4920*(1+thisz), 5060*(1+thisz), 1.)
         pyplot.plot(xx, model.eval(result.params, x=xx), lw=2, color='k')
         pyplot.savefig(
             SAVE_FOLDER+'redshift_fit_O3doublet_%s_%s_mod%s.png' % (FIELD, thisID, module))

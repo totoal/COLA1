@@ -191,8 +191,7 @@ for q in range(len(IDlist)):
         fig, (ax1, ax2) = pyplot.subplots(1, 2)
         ax1.imshow(np.arcsinh(subset_data), origin='lower')
         ax2.plot(x_fit, collapse_y)
-        ax2.plot(x_fit_oversample, model.eval(
-            result.params, x=x_fit_oversample))
+        ax2.plot(x_fit_oversample, model.eval(result.params, x=x_fit_oversample))
         ax1.axhline(25, color='w', ls=':')
         ax2.axvline(25, color='dimgray', ls=':')
         ax2.set_xlim(0, 50)
