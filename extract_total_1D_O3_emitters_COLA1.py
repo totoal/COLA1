@@ -37,7 +37,7 @@ ONED_FOLDER = '../spectra/SPECTRA_O3_FINAL/ONED/'
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 os.makedirs(ONED_FOLDER, exist_ok=True)
 
-CATALOG = '../catalogs/COLA1_O3_candidates_06102023.fits'
+CATALOG = '../catalogs/DOUBLESEARCH.fits'
 FIELD = 'COLA1'
 noise_rescale = 0.8008
 

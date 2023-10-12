@@ -1,3 +1,4 @@
+import os
 from lmfit import Model
 from astropy.io import fits
 import numpy as np
@@ -27,11 +28,13 @@ def gaussian_O3_withfudge(x, a, c, redshift, sigma, fudge):
 
 # if true, rescales the mean(err_1d) to be equal to the std(data_1d) with some outlier removal
 rescale_noise = False
-FOLDER = 'SPECTRA_O3_FINAL/'
-SAVE_FOLDER = 'SPECTRA_O3_FINAL/OPTIMAL_PROFILES/'
-ONED_FOLDER = 'SPECTRA_O3_FINAL/ONED/'
+SAVE_FOLDER = '../spectra/SPECTRA_O3_FINAL/FLUX_FIT/'
+SPECTRA_FOLDER = '../spectra/SPECTRA_O3_FINAL/ONED/'
 
-CATALOG = 'COLA1_O3_candidates_06102023.fits'
+os.makedirs(SAVE_FOLDER, exist_ok=True)
+
+SAVE_CATALOG = '../catalogs/COLA1_O3_fitted_flux.fits'
+CATALOG = '../catalogs/COLA1_O3_fitted_redshift.fits'
 FIELD = 'COLA1'
 noise_rescale = 0.8008
 
@@ -41,7 +44,7 @@ data = cat[1].data
 IDlist = data.field('NUMBER_1')  # NUMBER for other fields than J0100
 # REDO=data.field('REDO_1D')
 
-z_guesslist = data.field('z_O3doublett')
+z_guesslist = data.field('z_O3doublet')
 Nclumps_Y = data.field('Nclumps_Y')
 
 
@@ -100,6 +103,9 @@ for q in range(len(IDlist)):
             continue
         for i in range(3):
             try:
+                if not 'flux_tot_%s' % module in data_1d.names:
+                    continue
+
                 flux_tot = data_1d.field('flux_tot_%s' % module)
                 flux_tot_err = data_1d.field('flux_tot_%s_err' % module)
 
@@ -112,7 +118,7 @@ for q in range(len(IDlist)):
                     (obs_wav < 5050*(1+thisz))
 
                 if thisNclumps_spec == 1.:
-                    model = Model(gaussian, independent_vars=('x'))
+                    model = Model(gaussian)
                     model.set_param_hint('totflux', min=0., max=200)
                     model.set_param_hint('sigma', min=0.1, max=50)
                     model.set_param_hint('c', min=-0.005, max=0.005)
@@ -122,8 +128,7 @@ for q in range(len(IDlist)):
                         totflux=10, sigma=15., c=0, x0=(1+thisz)*thisline)
 
                 if thisNclumps_spec == 2.:
-                    model = Model(gaussian, independent_vars=(
-                        'x'), prefix='m1_') + Model(gaussian, independent_vars=('x'), prefix='m2_')
+                    model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_')
                     model.set_param_hint('m1_totflux', min=0.1, max=200)
                     model.set_param_hint('m1_sigma', min=0.1, max=27)
                     model.set_param_hint('m1_c', min=-0.05, max=0.05)
@@ -141,8 +146,7 @@ for q in range(len(IDlist)):
                     params['m2_c'].vary = False
 
                 if thisNclumps_spec == 3.:
-                    model = Model(gaussian, independent_vars=('x'), prefix='m1_') + Model(gaussian, independent_vars=(
-                        'x'), prefix='m2_') + Model(gaussian, independent_vars=('x'), prefix='m3_')
+                    model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
                     model.set_param_hint('m1_totflux', min=0.01, max=200)
                     model.set_param_hint('m1_sigma', min=0.1, max=50)
                     model.set_param_hint('m1_c', min=-0.05, max=0.05)
@@ -161,13 +165,13 @@ for q in range(len(IDlist)):
                     model.set_param_hint('m3_x0', min=(
                         1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
                     params = model.make_params(m1_totflux=10, m1_sigma=15., m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=15.,
-                                               m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=15., m3_c=0, m3_x0=(1+thisz)*thisline+5.)
+                                                m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=15., m3_c=0, m3_x0=(1+thisz)*thisline+5.)
 
                     params['m2_c'].vary = False
                     params['m3_c'].vary = False
 
                 result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
-                                   flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
+                                    flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
 
                 print(result.fit_report())
 
@@ -181,7 +185,7 @@ for q in range(len(IDlist)):
                 pyplot.plot(xx, model.eval(result.params, x=xx),
                             lw=2, color='k', alpha=0.5)
                 pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                               (FIELD, thisID, int(thisline), module))
+                                (FIELD, thisID, int(thisline), module))
                 pyplot.clf()
 
                 basicresult = copy.deepcopy(result)
@@ -213,7 +217,7 @@ for q in range(len(IDlist)):
                 thisline = 4862.69  # 4960.295 #Hbeta:4862.69
                 LINES = [4862.69, 4960.295]
                 SELECTIONS = [(obs_wav > 4800*(1+thisz))*(obs_wav < 4900*(1+thisz)),
-                              (obs_wav > 4935*(1+thisz))*(obs_wav < 4985*(1+thisz))]
+                                (obs_wav > 4935*(1+thisz))*(obs_wav < 4985*(1+thisz))]
 
                 # SELECTIONS=[(obs_wav>4800*(1+thisz))*(obs_wav<4880*(1+thisz)),(obs_wav>4935*(1+thisz))*(obs_wav<4985*(1+thisz))]
 
@@ -222,7 +226,7 @@ for q in range(len(IDlist)):
                     sel_include = SELECTIONS[qq]
 
                     if thisNclumps_spec == 1.:
-                        model = Model(gaussian, independent_vars=('x'))
+                        model = Model(gaussian)
                         model.set_param_hint('totflux', min=-0., max=200)
                         model.set_param_hint('sigma', min=0.1, max=50)
                         model.set_param_hint('c', min=-0.005, max=0.005)
@@ -234,7 +238,7 @@ for q in range(len(IDlist)):
 
                     if thisNclumps_spec == 2.:
                         model = Model(gaussian, independent_vars=(
-                            'x'), prefix='m1_') + Model(gaussian, independent_vars=('x'), prefix='m2_')
+                            'x'), prefix='m1_') + Model(gaussian, prefix='m2_')
                         model.set_param_hint('m1_totflux', min=-0.1, max=200)
                         model.set_param_hint('m1_sigma', min=0.1, max=50)
                         model.set_param_hint('m1_c', min=-0.025, max=0.025)
@@ -254,8 +258,7 @@ for q in range(len(IDlist)):
                         params['m2_sigma'].vary = False
 
                     if thisNclumps_spec == 3.:
-                        model = Model(gaussian, independent_vars=('x'), prefix='m1_') + Model(gaussian, independent_vars=(
-                            'x'), prefix='m2_') + Model(gaussian, independent_vars=('x'), prefix='m3_')
+                        model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
                         model.set_param_hint('m1_totflux', min=-0.001, max=200)
                         model.set_param_hint('m1_sigma', min=0.1, max=50)
                         model.set_param_hint('m1_c', min=-0.05, max=0.05)
@@ -276,7 +279,7 @@ for q in range(len(IDlist)):
                         model.set_param_hint('m3_x0', min=(
                             1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
                         params = model.make_params(m1_totflux=10, m1_sigma=O3_5008_sigma_1*thisline/5008.24, m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=O3_5008_sigma_2 *
-                                                   thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=O3_5008_sigma_3*thisline/5008.24, m3_c=0, m3_x0=(1+thisz)*thisline+5.)
+                                                    thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=O3_5008_sigma_3*thisline/5008.24, m3_c=0, m3_x0=(1+thisz)*thisline+5.)
 
                         params['m2_c'].vary = False
                         params['m3_c'].vary = False
@@ -285,7 +288,7 @@ for q in range(len(IDlist)):
                         params['m3_sigma'].vary = False
 
                     result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
-                                       flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
+                                        flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
 
                     print(result.fit_report())
 
@@ -299,7 +302,7 @@ for q in range(len(IDlist)):
                     pyplot.plot(xx, model.eval(result.params, x=xx),
                                 lw=2, color='k', alpha=0.5)
                     pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                                   (FIELD, thisID, int(thisline), module))
+                                    (FIELD, thisID, int(thisline), module))
                     pyplot.clf()
 
                     if thisline == 4862.69:

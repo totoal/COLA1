@@ -1,3 +1,4 @@
+import os
 from lmfit import Model
 from astropy.io import fits
 import numpy as np
@@ -27,7 +28,9 @@ rescale_noise = False
 SAVE_FOLDER = '../spectra/SPECTRA_O3_FINAL/REDSHIFT_FIT/'
 SPECTRA_FOLDER = '../spectra/SPECTRA_O3_FINAL/ONED/'
 
-CATALOG = '../catalogs/COLA1_O3_candidates_06102023.fits'
+os.makedirs(SAVE_FOLDER, exist_ok=True)
+
+CATALOG = '../catalogs/DOUBLESEARCH.fits'
 SAVE_CATALOG = '../catalogs/COLA1_O3_fitted_redshift.fits'
 FIELD = 'COLA1'
 noise_rescale = 0.8008
@@ -46,9 +49,6 @@ IDlist = data.field('NUMBER_1')  # NUMBER for other fields than J0100
 
 z_guesslist = data.field('z_O3doublet')
 Nclumps_Y = data.field('Nclumps_spec')
-# Modignore = data.field('Module_ignore')
-
-# REDO=data.field('REDO_zspec')
 
 redshift_O3doublet_A = np.zeros(len(IDlist))
 redshift_O3doublet_A_err = np.zeros(len(IDlist))
@@ -177,6 +177,10 @@ for q in range(len(IDlist)):
 
         xx = np.arange(4920*(1+thisz), 5060*(1+thisz), 1.)
         pyplot.plot(xx, model.eval(result.params, x=xx), lw=2, color='k')
+        try:
+            pyplot.title(f'z={redshift:0.5f}({redshifterr:0.5f})')
+        except:
+            pyplot.title(f'z={redshift}({redshifterr})')
         pyplot.savefig(
             SAVE_FOLDER+'redshift_fit_O3doublet_%s_%s_mod%s.png' % (FIELD, thisID, module))
         pyplot.clf()
@@ -184,14 +188,10 @@ for q in range(len(IDlist)):
         if module == 'A':
             redshift_O3doublet_A[q] = redshift
             redshift_O3doublet_A_err[q] = redshifterr
-            # fudge_A[q]=result.params['fudge'].value
-            # fudge_A_err[q]=result.params['fudge'].stderr
 
         if module == 'B':
             redshift_O3doublet_B[q] = redshift
             redshift_O3doublet_B_err[q] = redshifterr
-            # fudge_B[q]=result.params['fudge'].value
-            # fudge_B_err[q]=result.params['fudge'].stderr
 
 
 col1 = fits.Column(name='z_O3doublet_A_n', format='D',
@@ -225,8 +225,9 @@ col7 = fits.Column(name='fudge_A_err', format='D', array=fudge_A_err)
 col8 = fits.Column(name='fudge_B', format='D', array=fudge_B)
 col9 = fits.Column(name='fudge_B_err', format='D', array=fudge_B_err)
 
+col10 = fits.Column(name='Module_ignore', array=[''] * len(z_combined), format='A')
 
-new_cols = fits.ColDefs([col1, col2, col3, col4, col5, col6, col7, col8, col9])
+new_cols = fits.ColDefs([col1, col2, col3, col4, col5, col6, col7, col8, col9, col10])
 
 hdu = fits.BinTableHDU.from_columns(orig_cols + new_cols)
 
