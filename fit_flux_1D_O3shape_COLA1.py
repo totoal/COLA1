@@ -101,249 +101,249 @@ for q in range(len(IDlist)):
     for module in ['A', 'B']:
         if module == thismod_ign:
             continue
-        for i in range(3):
-            try:
-                if not 'flux_tot_%s' % module in data_1d.names:
-                    continue
+        # for i in range(3):
+            # try:
+        if not 'flux_tot_%s' % module in data_1d.names:
+            continue
 
-                flux_tot = data_1d.field('flux_tot_%s' % module)
-                flux_tot_err = data_1d.field('flux_tot_%s_err' % module)
+        flux_tot = data_1d.field('flux_tot_%s' % module)
+        flux_tot_err = data_1d.field('flux_tot_%s_err' % module)
 
-                if np.nanmax(flux_tot_err) == 0:
-                    flux_tot_err = np.zeros(
-                        len(flux_tot_err)) + np.nanstd(flux_tot[(obs_wav > 3.15E4)*(obs_wav < 3.95E4)])
+        if np.nanmax(flux_tot_err) == 0:
+            flux_tot_err = np.zeros(
+                len(flux_tot_err)) + np.nanstd(flux_tot[(obs_wav > 3.15E4)*(obs_wav < 3.95E4)])
 
-                thisline = 5008.24
-                sel_include = (obs_wav > 4975*(1+thisz)) * \
-                    (obs_wav < 5050*(1+thisz))
+        thisline = 5008.24
+        sel_include = (obs_wav > 4975*(1+thisz)) * \
+            (obs_wav < 5050*(1+thisz))
 
-                if thisNclumps_spec == 1.:
-                    model = Model(gaussian)
-                    model.set_param_hint('totflux', min=0., max=200)
-                    model.set_param_hint('sigma', min=0.1, max=50)
-                    model.set_param_hint('c', min=-0.005, max=0.005)
-                    model.set_param_hint('x0', min=(
-                        1+thisz)*thisline - 3, max=(1+thisz)*thisline + 3)
-                    params = model.make_params(
-                        totflux=10, sigma=15., c=0, x0=(1+thisz)*thisline)
+        if thisNclumps_spec == 1.:
+            model = Model(gaussian)
+            model.set_param_hint('totflux', min=0., max=200)
+            model.set_param_hint('sigma', min=0.1, max=50)
+            model.set_param_hint('c', min=-0.005, max=0.005)
+            model.set_param_hint('x0', min=(
+                1+thisz)*thisline - 3, max=(1+thisz)*thisline + 3)
+            params = model.make_params(
+                totflux=10, sigma=15., c=0, x0=(1+thisz)*thisline)
 
-                if thisNclumps_spec == 2.:
-                    model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_')
-                    model.set_param_hint('m1_totflux', min=0.1, max=200)
-                    model.set_param_hint('m1_sigma', min=0.1, max=27)
-                    model.set_param_hint('m1_c', min=-0.05, max=0.05)
-                    model.set_param_hint('m1_x0', min=(
-                        1+thisz)*thisline - 24, max=(1+thisz)*thisline + 24)
+        if thisNclumps_spec == 2.:
+            model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_')
+            model.set_param_hint('m1_totflux', min=0.1, max=200)
+            model.set_param_hint('m1_sigma', min=0.1, max=27)
+            model.set_param_hint('m1_c', min=-0.05, max=0.05)
+            model.set_param_hint('m1_x0', min=(
+                1+thisz)*thisline - 24, max=(1+thisz)*thisline + 24)
 
-                    model.set_param_hint('m2_totflux', min=0.1, max=200)
-                    model.set_param_hint('m2_sigma', min=0.1, max=27)
-                    model.set_param_hint('m2_c', min=-0.05, max=0.05)
-                    model.set_param_hint('m2_x0', min=(
-                        1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
-                    params = model.make_params(m1_totflux=10, m1_sigma=15., m1_c=0, m1_x0=(
-                        1+thisz)*thisline, m2_totflux=10, m2_sigma=15., m2_c=0, m2_x0=(1+thisz)*thisline-5.)
+            model.set_param_hint('m2_totflux', min=0.1, max=200)
+            model.set_param_hint('m2_sigma', min=0.1, max=27)
+            model.set_param_hint('m2_c', min=-0.05, max=0.05)
+            model.set_param_hint('m2_x0', min=(
+                1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
+            params = model.make_params(m1_totflux=10, m1_sigma=15., m1_c=0, m1_x0=(
+                1+thisz)*thisline, m2_totflux=10, m2_sigma=15., m2_c=0, m2_x0=(1+thisz)*thisline-5.)
 
-                    params['m2_c'].vary = False
+            params['m2_c'].vary = False
 
-                if thisNclumps_spec == 3.:
-                    model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
-                    model.set_param_hint('m1_totflux', min=0.01, max=200)
-                    model.set_param_hint('m1_sigma', min=0.1, max=50)
-                    model.set_param_hint('m1_c', min=-0.05, max=0.05)
-                    model.set_param_hint('m1_x0', min=(
-                        1+thisz)*thisline - 10, max=(1+thisz)*thisline + 10)
+        if thisNclumps_spec == 3.:
+            model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
+            model.set_param_hint('m1_totflux', min=0.01, max=200)
+            model.set_param_hint('m1_sigma', min=0.1, max=50)
+            model.set_param_hint('m1_c', min=-0.05, max=0.05)
+            model.set_param_hint('m1_x0', min=(
+                1+thisz)*thisline - 10, max=(1+thisz)*thisline + 10)
 
-                    model.set_param_hint('m2_totflux', min=0.01, max=200)
-                    model.set_param_hint('m2_sigma', min=0.1, max=50)
-                    model.set_param_hint('m2_c', min=-0.05, max=0.05)
-                    model.set_param_hint('m2_x0', min=(
-                        1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
+            model.set_param_hint('m2_totflux', min=0.01, max=200)
+            model.set_param_hint('m2_sigma', min=0.1, max=50)
+            model.set_param_hint('m2_c', min=-0.05, max=0.05)
+            model.set_param_hint('m2_x0', min=(
+                1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
 
-                    model.set_param_hint('m3_totflux', min=0.01, max=200)
-                    model.set_param_hint('m3_sigma', min=0.1, max=50)
-                    model.set_param_hint('m3_c', min=-0.05, max=0.05)
-                    model.set_param_hint('m3_x0', min=(
-                        1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
-                    params = model.make_params(m1_totflux=10, m1_sigma=15., m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=15.,
-                                                m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=15., m3_c=0, m3_x0=(1+thisz)*thisline+5.)
+            model.set_param_hint('m3_totflux', min=0.01, max=200)
+            model.set_param_hint('m3_sigma', min=0.1, max=50)
+            model.set_param_hint('m3_c', min=-0.05, max=0.05)
+            model.set_param_hint('m3_x0', min=(
+                1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
+            params = model.make_params(m1_totflux=10, m1_sigma=15., m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=15.,
+                                        m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=15., m3_c=0, m3_x0=(1+thisz)*thisline+5.)
 
-                    params['m2_c'].vary = False
-                    params['m3_c'].vary = False
+            params['m2_c'].vary = False
+            params['m3_c'].vary = False
 
-                result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
-                                    flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
+        result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
+                            flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
 
-                print(result.fit_report())
+        print(result.fit_report())
 
-                pyplot.plot(obs_wav[sel_include], flux_tot[sel_include],
-                            color='tab:blue', drawstyle='steps-mid')
-                pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
-                                    flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
+        pyplot.plot(obs_wav[sel_include], flux_tot[sel_include],
+                    color='tab:blue', drawstyle='steps-mid')
+        pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
+                            flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
 
-                xx = numpy.arange(min(obs_wav[sel_include]), max(
-                    obs_wav[sel_include]), 0.01)
-                pyplot.plot(xx, model.eval(result.params, x=xx),
-                            lw=2, color='k', alpha=0.5)
-                pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                                (FIELD, thisID, int(thisline), module))
-                pyplot.clf()
+        xx = numpy.arange(min(obs_wav[sel_include]), max(
+            obs_wav[sel_include]), 0.01)
+        pyplot.plot(xx, model.eval(result.params, x=xx),
+                    lw=2, color='k', alpha=0.5)
+        pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
+                        (FIELD, thisID, int(thisline), module))
+        pyplot.clf()
 
-                basicresult = copy.deepcopy(result)
+        basicresult = copy.deepcopy(result)
 
+        if thisNclumps_spec == 1:
+            O3_5008_sigma = result.params['sigma'].value
+            O3_5008_flux = result.params['totflux'].value
+            O3_5008_flux_err = result.params['totflux'].stderr
+
+        if thisNclumps_spec == 2:
+            O3_5008_sigma_1 = result.params['m1_sigma'].value
+            O3_5008_sigma_2 = result.params['m2_sigma'].value
+            O3_5008_flux = result.params['m1_totflux'].value + \
+                result.params['m2_totflux'].value
+            O3_5008_flux_err = (
+                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
+
+        if thisNclumps_spec == 3:
+            O3_5008_sigma_1 = result.params['m1_sigma'].value
+            O3_5008_sigma_2 = result.params['m2_sigma'].value
+            O3_5008_sigma_3 = result.params['m3_sigma'].value
+            O3_5008_flux = result.params['m1_totflux'].value + \
+                result.params['m2_totflux'].value + + \
+                result.params['m3_totflux'].value
+            O3_5008_flux_err = (
+                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
+
+        # NOW 4960 and Hbeta
+        thisline = 4862.69  # 4960.295 #Hbeta:4862.69
+        LINES = [4862.69, 4960.295]
+        SELECTIONS = [(obs_wav > 4800*(1+thisz))*(obs_wav < 4900*(1+thisz)),
+                        (obs_wav > 4935*(1+thisz))*(obs_wav < 4985*(1+thisz))]
+
+        # SELECTIONS=[(obs_wav>4800*(1+thisz))*(obs_wav<4880*(1+thisz)),(obs_wav>4935*(1+thisz))*(obs_wav<4985*(1+thisz))]
+
+        for qq in range(len(LINES)):
+            thisline = LINES[qq]
+            sel_include = SELECTIONS[qq]
+
+            if thisNclumps_spec == 1.:
+                model = Model(gaussian)
+                model.set_param_hint('totflux', min=-0., max=200)
+                model.set_param_hint('sigma', min=0.1, max=50)
+                model.set_param_hint('c', min=-0.005, max=0.005)
+                model.set_param_hint('x0', min=(
+                    1+thisz)*thisline - 3, max=(1+thisz)*thisline + 3)
+                params = model.make_params(
+                    totflux=10, sigma=O3_5008_sigma*thisline/5008.24, c=0, x0=(1+thisz)*thisline)
+                params['sigma'].vary = False
+
+            if thisNclumps_spec == 2.:
+                model = Model(gaussian, independent_vars=(
+                    'x'), prefix='m1_') + Model(gaussian, prefix='m2_')
+                model.set_param_hint('m1_totflux', min=-0.1, max=200)
+                model.set_param_hint('m1_sigma', min=0.1, max=50)
+                model.set_param_hint('m1_c', min=-0.025, max=0.025)
+                model.set_param_hint('m1_x0', min=(
+                    1+thisz)*thisline - 12, max=(1+thisz)*thisline + 12)
+
+                model.set_param_hint('m2_totflux', min=-0.1, max=200)
+                model.set_param_hint('m2_sigma', min=0.1, max=50)
+                model.set_param_hint('m2_c', min=-0.05, max=0.05)
+                model.set_param_hint('m2_x0', min=(
+                    1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
+                params = model.make_params(m1_totflux=10, m1_sigma=O3_5008_sigma_1*thisline/5008.24, m1_c=0, m1_x0=(
+                    1+thisz)*thisline, m2_totflux=10, m2_sigma=O3_5008_sigma_2*thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5.)
+
+                params['m2_c'].vary = False
+                params['m1_sigma'].vary = False
+                params['m2_sigma'].vary = False
+
+            if thisNclumps_spec == 3.:
+                model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
+                model.set_param_hint('m1_totflux', min=-0.001, max=200)
+                model.set_param_hint('m1_sigma', min=0.1, max=50)
+                model.set_param_hint('m1_c', min=-0.05, max=0.05)
+                model.set_param_hint('m1_x0', min=(
+                    1+thisz)*thisline - 30, max=(1+thisz)*thisline + 30)
+
+                model.set_param_hint(
+                    'm2_totflux', min=-10.001, max=200)
+                model.set_param_hint('m2_sigma', min=0.1, max=50)
+                model.set_param_hint('m2_c', min=-0.05, max=0.05)
+                model.set_param_hint('m2_x0', min=(
+                    1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
+
+                model.set_param_hint(
+                    'm3_totflux', min=-10.001, max=200)
+                model.set_param_hint('m3_sigma', min=0.1, max=50)
+                model.set_param_hint('m3_c', min=-0.05, max=0.05)
+                model.set_param_hint('m3_x0', min=(
+                    1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
+                params = model.make_params(m1_totflux=10, m1_sigma=O3_5008_sigma_1*thisline/5008.24, m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=O3_5008_sigma_2 *
+                                            thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=O3_5008_sigma_3*thisline/5008.24, m3_c=0, m3_x0=(1+thisz)*thisline+5.)
+
+                params['m2_c'].vary = False
+                params['m3_c'].vary = False
+                params['m1_sigma'].vary = False
+                params['m2_sigma'].vary = False
+                params['m3_sigma'].vary = False
+
+            result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
+                                flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
+
+            print(result.fit_report())
+
+            pyplot.plot(obs_wav[sel_include], flux_tot[sel_include],
+                        color='tab:blue', drawstyle='steps-mid')
+            pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
+                                flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
+
+            xx = numpy.arange(min(obs_wav[sel_include]), max(
+                obs_wav[sel_include]), 0.01)
+            pyplot.plot(xx, model.eval(result.params, x=xx),
+                        lw=2, color='k', alpha=0.5)
+            pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
+                            (FIELD, thisID, int(thisline), module))
+            pyplot.clf()
+
+            if thisline == 4862.69:
                 if thisNclumps_spec == 1:
-                    O3_5008_sigma = result.params['sigma'].value
-                    O3_5008_flux = result.params['totflux'].value
-                    O3_5008_flux_err = result.params['totflux'].stderr
+                    Hb_flux = result.params['totflux'].value
+                    Hb_flux_err = result.params['totflux'].stderr
 
                 if thisNclumps_spec == 2:
-                    O3_5008_sigma_1 = result.params['m1_sigma'].value
-                    O3_5008_sigma_2 = result.params['m2_sigma'].value
-                    O3_5008_flux = result.params['m1_totflux'].value + \
+                    Hb_flux = result.params['m1_totflux'].value + \
                         result.params['m2_totflux'].value
-                    O3_5008_flux_err = (
+                    Hb_flux_err = (
                         result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
 
                 if thisNclumps_spec == 3:
-                    O3_5008_sigma_1 = result.params['m1_sigma'].value
-                    O3_5008_sigma_2 = result.params['m2_sigma'].value
-                    O3_5008_sigma_3 = result.params['m3_sigma'].value
-                    O3_5008_flux = result.params['m1_totflux'].value + \
+                    Hb_flux = result.params['m1_totflux'].value + \
                         result.params['m2_totflux'].value + + \
                         result.params['m3_totflux'].value
-                    O3_5008_flux_err = (
+                    Hb_flux_err = (
                         result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
 
-                # NOW 4960 and Hbeta
-                thisline = 4862.69  # 4960.295 #Hbeta:4862.69
-                LINES = [4862.69, 4960.295]
-                SELECTIONS = [(obs_wav > 4800*(1+thisz))*(obs_wav < 4900*(1+thisz)),
-                                (obs_wav > 4935*(1+thisz))*(obs_wav < 4985*(1+thisz))]
+            if thisline == 4960.295:
+                if thisNclumps_spec == 1:
+                    O3_4960_flux = result.params['totflux'].value
+                    O3_4960_flux_err = result.params['totflux'].stderr
 
-                # SELECTIONS=[(obs_wav>4800*(1+thisz))*(obs_wav<4880*(1+thisz)),(obs_wav>4935*(1+thisz))*(obs_wav<4985*(1+thisz))]
+                if thisNclumps_spec == 2:
+                    O3_4960_flux = result.params['m1_totflux'].value + \
+                        result.params['m2_totflux'].value
+                    O3_4960_flux_err = (
+                        result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
 
-                for qq in range(len(LINES)):
-                    thisline = LINES[qq]
-                    sel_include = SELECTIONS[qq]
+                if thisNclumps_spec == 3:
+                    O3_4960_flux = result.params['m1_totflux'].value + \
+                        result.params['m2_totflux'].value + + \
+                        result.params['m3_totflux'].value
+                    O3_4960_flux_err = (
+                        result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
 
-                    if thisNclumps_spec == 1.:
-                        model = Model(gaussian)
-                        model.set_param_hint('totflux', min=-0., max=200)
-                        model.set_param_hint('sigma', min=0.1, max=50)
-                        model.set_param_hint('c', min=-0.005, max=0.005)
-                        model.set_param_hint('x0', min=(
-                            1+thisz)*thisline - 3, max=(1+thisz)*thisline + 3)
-                        params = model.make_params(
-                            totflux=10, sigma=O3_5008_sigma*thisline/5008.24, c=0, x0=(1+thisz)*thisline)
-                        params['sigma'].vary = False
-
-                    if thisNclumps_spec == 2.:
-                        model = Model(gaussian, independent_vars=(
-                            'x'), prefix='m1_') + Model(gaussian, prefix='m2_')
-                        model.set_param_hint('m1_totflux', min=-0.1, max=200)
-                        model.set_param_hint('m1_sigma', min=0.1, max=50)
-                        model.set_param_hint('m1_c', min=-0.025, max=0.025)
-                        model.set_param_hint('m1_x0', min=(
-                            1+thisz)*thisline - 12, max=(1+thisz)*thisline + 12)
-
-                        model.set_param_hint('m2_totflux', min=-0.1, max=200)
-                        model.set_param_hint('m2_sigma', min=0.1, max=50)
-                        model.set_param_hint('m2_c', min=-0.05, max=0.05)
-                        model.set_param_hint('m2_x0', min=(
-                            1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
-                        params = model.make_params(m1_totflux=10, m1_sigma=O3_5008_sigma_1*thisline/5008.24, m1_c=0, m1_x0=(
-                            1+thisz)*thisline, m2_totflux=10, m2_sigma=O3_5008_sigma_2*thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5.)
-
-                        params['m2_c'].vary = False
-                        params['m1_sigma'].vary = False
-                        params['m2_sigma'].vary = False
-
-                    if thisNclumps_spec == 3.:
-                        model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
-                        model.set_param_hint('m1_totflux', min=-0.001, max=200)
-                        model.set_param_hint('m1_sigma', min=0.1, max=50)
-                        model.set_param_hint('m1_c', min=-0.05, max=0.05)
-                        model.set_param_hint('m1_x0', min=(
-                            1+thisz)*thisline - 30, max=(1+thisz)*thisline + 30)
-
-                        model.set_param_hint(
-                            'm2_totflux', min=-10.001, max=200)
-                        model.set_param_hint('m2_sigma', min=0.1, max=50)
-                        model.set_param_hint('m2_c', min=-0.05, max=0.05)
-                        model.set_param_hint('m2_x0', min=(
-                            1+thisz)*thisline - 70, max=(1+thisz)*thisline + 70)
-
-                        model.set_param_hint(
-                            'm3_totflux', min=-10.001, max=200)
-                        model.set_param_hint('m3_sigma', min=0.1, max=50)
-                        model.set_param_hint('m3_c', min=-0.05, max=0.05)
-                        model.set_param_hint('m3_x0', min=(
-                            1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
-                        params = model.make_params(m1_totflux=10, m1_sigma=O3_5008_sigma_1*thisline/5008.24, m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=O3_5008_sigma_2 *
-                                                    thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=O3_5008_sigma_3*thisline/5008.24, m3_c=0, m3_x0=(1+thisz)*thisline+5.)
-
-                        params['m2_c'].vary = False
-                        params['m3_c'].vary = False
-                        params['m1_sigma'].vary = False
-                        params['m2_sigma'].vary = False
-                        params['m3_sigma'].vary = False
-
-                    result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
-                                        flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
-
-                    print(result.fit_report())
-
-                    pyplot.plot(obs_wav[sel_include], flux_tot[sel_include],
-                                color='tab:blue', drawstyle='steps-mid')
-                    pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
-                                        flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
-
-                    xx = numpy.arange(min(obs_wav[sel_include]), max(
-                        obs_wav[sel_include]), 0.01)
-                    pyplot.plot(xx, model.eval(result.params, x=xx),
-                                lw=2, color='k', alpha=0.5)
-                    pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                                    (FIELD, thisID, int(thisline), module))
-                    pyplot.clf()
-
-                    if thisline == 4862.69:
-                        if thisNclumps_spec == 1:
-                            Hb_flux = result.params['totflux'].value
-                            Hb_flux_err = result.params['totflux'].stderr
-
-                        if thisNclumps_spec == 2:
-                            Hb_flux = result.params['m1_totflux'].value + \
-                                result.params['m2_totflux'].value
-                            Hb_flux_err = (
-                                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
-
-                        if thisNclumps_spec == 3:
-                            Hb_flux = result.params['m1_totflux'].value + \
-                                result.params['m2_totflux'].value + + \
-                                result.params['m3_totflux'].value
-                            Hb_flux_err = (
-                                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
-
-                    if thisline == 4960.295:
-                        if thisNclumps_spec == 1:
-                            O3_4960_flux = result.params['totflux'].value
-                            O3_4960_flux_err = result.params['totflux'].stderr
-
-                        if thisNclumps_spec == 2:
-                            O3_4960_flux = result.params['m1_totflux'].value + \
-                                result.params['m2_totflux'].value
-                            O3_4960_flux_err = (
-                                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
-
-                        if thisNclumps_spec == 3:
-                            O3_4960_flux = result.params['m1_totflux'].value + \
-                                result.params['m2_totflux'].value + + \
-                                result.params['m3_totflux'].value
-                            O3_4960_flux_err = (
-                                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
-
-            except:
-                continue
-            break
+            # except:
+            #     continue
+            # break
 
         if module == 'A':
             flux_5008_A[q] = O3_5008_flux

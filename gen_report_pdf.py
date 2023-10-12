@@ -46,6 +46,11 @@ def gen_report_pdf(CATALOG, SPEC2D_FOLDER, Z_FIT_FOLDER, FLUX_FIT_FOLDER,
 
         # Look for Redshift fits in both modules
         zfit_list = glob.glob(f'{Z_FIT_FOLDER}/redshift_fit_O3doublet_COLA1_{cand_number}_*')
+        if len(zfit_list) == 0:
+            zfit_list = glob.glob(f'{Z_FIT_FOLDER}/redshift_fit_O3_5008_COLA1_{cand_number}_*')
+        if len(zfit_list) == 0:
+            raise Exception('No images found.')
+
         tab = []
         for mod in modules:
             for zfit_path in zfit_list:
