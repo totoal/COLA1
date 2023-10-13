@@ -225,9 +225,9 @@ col7 = fits.Column(name='fudge_A_err', format='D', array=fudge_A_err)
 col8 = fits.Column(name='fudge_B', format='D', array=fudge_B)
 col9 = fits.Column(name='fudge_B_err', format='D', array=fudge_B_err)
 
-col10 = fits.Column(name='Module_ignore', array=[''] * len(z_combined), format='A')
+# col10 = fits.Column(name='Module_ignore', array=[''] * len(z_combined), format='A')
 
-new_cols = fits.ColDefs([col1, col2, col3, col4, col5, col6, col7, col8, col9, col10])
+new_cols = fits.ColDefs([col1, col2, col3, col4, col5, col6, col7, col8, col9])
 
 hdu = fits.BinTableHDU.from_columns(orig_cols + new_cols)
 

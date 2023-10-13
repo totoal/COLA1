@@ -99,13 +99,11 @@ for q in range(len(IDlist)):
 
     obs_wav = data_1d.field('wavelength')  # in Angstroms
     for module in ['A', 'B']:
-        if module == thismod_ign:
-            continue
-        # for i in range(3):
-            # try:
         if not 'flux_tot_%s' % module in data_1d.names:
             continue
 
+        if module == thismod_ign:
+            continue
         flux_tot = data_1d.field('flux_tot_%s' % module)
         flux_tot_err = data_1d.field('flux_tot_%s_err' % module)
 
@@ -128,7 +126,8 @@ for q in range(len(IDlist)):
                 totflux=10, sigma=15., c=0, x0=(1+thisz)*thisline)
 
         if thisNclumps_spec == 2.:
-            model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_')
+            model = Model(gaussian, prefix='m1_') + \
+                Model(gaussian, prefix='m2_')
             model.set_param_hint('m1_totflux', min=0.1, max=200)
             model.set_param_hint('m1_sigma', min=0.1, max=27)
             model.set_param_hint('m1_c', min=-0.05, max=0.05)
@@ -146,7 +145,8 @@ for q in range(len(IDlist)):
             params['m2_c'].vary = False
 
         if thisNclumps_spec == 3.:
-            model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
+            model = Model(gaussian, prefix='m1_') + Model(gaussian,
+                                                        prefix='m2_') + Model(gaussian, prefix='m3_')
             model.set_param_hint('m1_totflux', min=0.01, max=200)
             model.set_param_hint('m1_sigma', min=0.1, max=50)
             model.set_param_hint('m1_c', min=-0.05, max=0.05)
@@ -165,13 +165,17 @@ for q in range(len(IDlist)):
             model.set_param_hint('m3_x0', min=(
                 1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
             params = model.make_params(m1_totflux=10, m1_sigma=15., m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=15.,
-                                        m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=15., m3_c=0, m3_x0=(1+thisz)*thisline+5.)
+                                    m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=15., m3_c=0, m3_x0=(1+thisz)*thisline+5.)
 
             params['m2_c'].vary = False
             params['m3_c'].vary = False
 
-        result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
-                            flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
+        for i in range(5): # Try 5 times
+            result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
+                            flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution', max_nfev=100000)
+            good_fit = result.errorbars
+            if not good_fit:
+                continue
 
         print(result.fit_report())
 
@@ -184,24 +188,29 @@ for q in range(len(IDlist)):
             obs_wav[sel_include]), 0.01)
         pyplot.plot(xx, model.eval(result.params, x=xx),
                     lw=2, color='k', alpha=0.5)
+        pyplot.title(f'{good_fit=}')
         pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                        (FIELD, thisID, int(thisline), module))
+                    (FIELD, thisID, int(thisline), module))
         pyplot.clf()
-
-        basicresult = copy.deepcopy(result)
 
         if thisNclumps_spec == 1:
             O3_5008_sigma = result.params['sigma'].value
             O3_5008_flux = result.params['totflux'].value
-            O3_5008_flux_err = result.params['totflux'].stderr
+            if good_fit:
+                O3_5008_flux_err = result.params['totflux'].stderr
+            else:
+                O3_5008_flux_err = 99.
 
         if thisNclumps_spec == 2:
             O3_5008_sigma_1 = result.params['m1_sigma'].value
             O3_5008_sigma_2 = result.params['m2_sigma'].value
             O3_5008_flux = result.params['m1_totflux'].value + \
                 result.params['m2_totflux'].value
-            O3_5008_flux_err = (
-                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
+            if good_fit:
+                O3_5008_flux_err = (
+                    result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
+            else:
+                O3_5008_flux_err = 99.
 
         if thisNclumps_spec == 3:
             O3_5008_sigma_1 = result.params['m1_sigma'].value
@@ -210,14 +219,17 @@ for q in range(len(IDlist)):
             O3_5008_flux = result.params['m1_totflux'].value + \
                 result.params['m2_totflux'].value + + \
                 result.params['m3_totflux'].value
-            O3_5008_flux_err = (
-                result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
+            if good_fit:
+                O3_5008_flux_err = (
+                    result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
+            else:
+                O3_5008_flux_err = 99.
 
         # NOW 4960 and Hbeta
         thisline = 4862.69  # 4960.295 #Hbeta:4862.69
         LINES = [4862.69, 4960.295]
         SELECTIONS = [(obs_wav > 4800*(1+thisz))*(obs_wav < 4900*(1+thisz)),
-                        (obs_wav > 4935*(1+thisz))*(obs_wav < 4985*(1+thisz))]
+                    (obs_wav > 4935*(1+thisz))*(obs_wav < 4985*(1+thisz))]
 
         # SELECTIONS=[(obs_wav>4800*(1+thisz))*(obs_wav<4880*(1+thisz)),(obs_wav>4935*(1+thisz))*(obs_wav<4985*(1+thisz))]
 
@@ -237,8 +249,8 @@ for q in range(len(IDlist)):
                 params['sigma'].vary = False
 
             if thisNclumps_spec == 2.:
-                model = Model(gaussian, independent_vars=(
-                    'x'), prefix='m1_') + Model(gaussian, prefix='m2_')
+                model = Model(gaussian, prefix='m1_') + \
+                    Model(gaussian, prefix='m2_')
                 model.set_param_hint('m1_totflux', min=-0.1, max=200)
                 model.set_param_hint('m1_sigma', min=0.1, max=50)
                 model.set_param_hint('m1_c', min=-0.025, max=0.025)
@@ -258,7 +270,8 @@ for q in range(len(IDlist)):
                 params['m2_sigma'].vary = False
 
             if thisNclumps_spec == 3.:
-                model = Model(gaussian, prefix='m1_') + Model(gaussian, prefix='m2_') + Model(gaussian, prefix='m3_')
+                model = Model(gaussian, prefix='m1_') + Model(gaussian,
+                                                            prefix='m2_') + Model(gaussian, prefix='m3_')
                 model.set_param_hint('m1_totflux', min=-0.001, max=200)
                 model.set_param_hint('m1_sigma', min=0.1, max=50)
                 model.set_param_hint('m1_c', min=-0.05, max=0.05)
@@ -279,7 +292,7 @@ for q in range(len(IDlist)):
                 model.set_param_hint('m3_x0', min=(
                     1+thisz)*thisline - 90, max=(1+thisz)*thisline + 90)
                 params = model.make_params(m1_totflux=10, m1_sigma=O3_5008_sigma_1*thisline/5008.24, m1_c=0, m1_x0=(1+thisz)*thisline, m2_totflux=10, m2_sigma=O3_5008_sigma_2 *
-                                            thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=O3_5008_sigma_3*thisline/5008.24, m3_c=0, m3_x0=(1+thisz)*thisline+5.)
+                                        thisline/5008.24, m2_c=0, m2_x0=(1+thisz)*thisline-5., m3_totflux=10, m3_sigma=O3_5008_sigma_3*thisline/5008.24, m3_c=0, m3_x0=(1+thisz)*thisline+5.)
 
                 params['m2_c'].vary = False
                 params['m3_c'].vary = False
@@ -288,7 +301,8 @@ for q in range(len(IDlist)):
                 params['m3_sigma'].vary = False
 
             result = model.fit(flux_tot[sel_include], x=obs_wav[sel_include], params=params, weights=1. /
-                                flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution')
+                            flux_tot_err[sel_include], nan_policy='propagate', method='differential_evolution', max_nfev=100000)
+            good_fit = result.errorbars
 
             print(result.fit_report())
 
@@ -301,45 +315,64 @@ for q in range(len(IDlist)):
                 obs_wav[sel_include]), 0.01)
             pyplot.plot(xx, model.eval(result.params, x=xx),
                         lw=2, color='k', alpha=0.5)
+            pyplot.title(f'{good_fit=}')
             pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                            (FIELD, thisID, int(thisline), module))
+                        (FIELD, thisID, int(thisline), module))
             pyplot.clf()
 
             if thisline == 4862.69:
                 if thisNclumps_spec == 1:
                     Hb_flux = result.params['totflux'].value
-                    Hb_flux_err = result.params['totflux'].stderr
+                    if good_fit:
+                        Hb_flux_err = result.params['totflux'].stderr
+                    else:
+                        Hb_flux_err = 99.
 
                 if thisNclumps_spec == 2:
                     Hb_flux = result.params['m1_totflux'].value + \
                         result.params['m2_totflux'].value
-                    Hb_flux_err = (
-                        result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
+                    if good_fit:
+                        Hb_flux_err = (
+                            result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
+                    else:
+                        Hb_flux_err = 99.
 
                 if thisNclumps_spec == 3:
                     Hb_flux = result.params['m1_totflux'].value + \
                         result.params['m2_totflux'].value + + \
                         result.params['m3_totflux'].value
-                    Hb_flux_err = (
-                        result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
+                    if good_fit:
+                        Hb_flux_err = (
+                            result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
+                    else:
+                        Hb_flux_err = 99.
 
             if thisline == 4960.295:
                 if thisNclumps_spec == 1:
                     O3_4960_flux = result.params['totflux'].value
-                    O3_4960_flux_err = result.params['totflux'].stderr
+                    if good_fit:
+                        O3_4960_flux_err = result.params['totflux'].stderr
+                    else:
+                        O3_4960_flux_err = 99.
 
                 if thisNclumps_spec == 2:
                     O3_4960_flux = result.params['m1_totflux'].value + \
                         result.params['m2_totflux'].value
-                    O3_4960_flux_err = (
-                        result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
+                    if good_fit:
+                        O3_4960_flux_err = (
+                            result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2)**0.5
+                    else:
+                        O3_4960_flux_err = 99.
 
                 if thisNclumps_spec == 3:
                     O3_4960_flux = result.params['m1_totflux'].value + \
                         result.params['m2_totflux'].value + + \
                         result.params['m3_totflux'].value
-                    O3_4960_flux_err = (
-                        result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
+                    if good_fit:
+                        O3_4960_flux_err = (
+                            result.params['m1_totflux'].stderr**2 + result.params['m2_totflux'].stderr**2 + result.params['m3_totflux'].stderr**2)**0.5
+                    else:
+                        O3_4960_flux_err = 99.
 
             # except:
             #     continue
