@@ -14,24 +14,10 @@ def gaussian(x, totflux, c, x0, sigma):
     return totflux*((sigma)**-1 * (2*np.pi)**-0.5 * np.exp(-(x-x0)**2/(2*sigma**2)))+c
 
 
-def gaussian_O3(x, a, c, redshift, sigma):
-    x0_O31 = (1+redshift)*4960.295
-    x0_O32 = (1+redshift)*5008.24
-    return c + a*(numpy.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*numpy.exp(-(x-x0_O32)**2/(2*sigma**2)))
-
-
-def gaussian_O3_withfudge(x, a, c, redshift, sigma, fudge):
-    x0_O31 = (1+redshift)*4960.295
-    x0_O32 = (1+redshift)*5008.24
-    return c + a*(numpy.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*fudge*numpy.exp(-(x-x0_O32)**2/(2*sigma**2)))
-
-
 # if true, rescales the mean(err_1d) to be equal to the std(data_1d) with some outlier removal
 rescale_noise = False
 SAVE_FOLDER = './'
 SPECTRA_FOLDER = '../../spectra/SPECTRA_O3_FINAL/ONED/'
-
-os.makedirs(SAVE_FOLDER, exist_ok=True)
 
 SAVE_CATALOG = './COLA1_O3_fitted_flux.fits'
 CATALOG = '../../catalogs/COLA1_O3_fitted_redshift.fits'
@@ -349,7 +335,7 @@ for q in range(len(IDlist)):
 
                 if thisNclumps_spec == 3:
                     Hb_flux = result.params['m1_totflux'].value + \
-                        result.params['m2_totflux'].value + + \
+                        result.params['m2_totflux'].value + \
                         result.params['m3_totflux'].value
                     if good_fit:
                         Hb_flux_err = (
@@ -449,11 +435,11 @@ for q in range(len(IDlist)):
             flux_4862_A[q] = Hb_flux
             flux_4862_A_err[q] = Hb_flux_err
 
-            flux_4341_A[q] = Hb_flux
-            flux_4341_A_err[q] = Hb_flux_err
+            flux_4363_A[q] = O3_4364_flux
+            flux_4363_A_err[q] = O3_4364_flux_err
 
-            flux_4363_A[q] = Hb_flux
-            flux_4363_A_err[q] = Hb_flux_err
+            flux_4341_A[q] = Hg_flux
+            flux_4341_A_err[q] = Hg_flux_err
 
         if module == 'B':
             flux_5008_B[q] = O3_5008_flux
@@ -465,11 +451,11 @@ for q in range(len(IDlist)):
             flux_4862_B[q] = Hb_flux
             flux_4862_B_err[q] = Hb_flux_err
 
-            flux_4341_B[q] = Hb_flux
-            flux_4341_B_err[q] = Hb_flux_err
+            flux_4363_B[q] = O3_4364_flux
+            flux_4363_B_err[q] = O3_4364_flux_err
 
-            flux_4363_B[q] = Hb_flux
-            flux_4363_B_err[q] = Hb_flux_err
+            flux_4341_B[q] = Hg_flux
+            flux_4341_B_err[q] = Hg_flux_err
 
         # need to reset!
         print(thisID, 'modA: ')

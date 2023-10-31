@@ -68,6 +68,7 @@ def gen_report_pdf(CATALOG, SPEC2D_FOLDER, Z_FIT_FOLDER, FLUX_FIT_FOLDER,
             tab = []
             for flux_fit_path in flux_fit_list:
                 if flux_fit_path[-5] == mod:
+                    print(flux_fit_path)
                     img = Image(flux_fit_path, width=0.4*imgsize*inch, height=0.4*imgsize*inch,
                                 kind='proportional')
                     tab.append(img)

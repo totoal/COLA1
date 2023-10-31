@@ -51,6 +51,8 @@ IDlist = data.field('NUMBER_1')  # NUMBER for other fields than J0100
 z_guesslist = data.field('z_O3doublet')
 Nclumps_Y = data.field('Nclumps_Y')
 
+special_fit = [12655]
+
 
 for q in range(len(IDlist)):
     thisID = int(IDlist[q])
@@ -89,6 +91,13 @@ for q in range(len(IDlist)):
                 (wav_array < 5008.24*(1+thisz) + 5008.24*(1+thisz)*250/3E5)  # this
 
         subset_data = data[:, sel_wav]
+
+        if thisID in special_fit:
+            mask = np.ones_like(subset_data).astype(bool)
+            mask[20 : 23] = False
+            subset_data[~mask] = 0.
+
+
         sel_real = np.isfinite(subset_data)
         print(len(subset_data[sel_real]))
         if len(subset_data[sel_real]) == 0:

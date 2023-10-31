@@ -11,12 +11,6 @@ def gaussian(x, totflux, c, x0, sigma):
     return totflux*((sigma)**-1 * (2*np.pi)**-0.5 * np.exp(-(x-x0)**2/(2*sigma**2)))+c
 
 
-def gaussian_O3(x, a, c, redshift, sigma):
-    x0_O31 = (1+redshift)*4960.295
-    x0_O32 = (1+redshift)*5008.24
-    return c + a*(np.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*np.exp(-(x-x0_O32)**2/(2*sigma**2)))
-
-
 def gaussian_O3_withfudge(x, a, c, redshift, sigma, fudge):
     x0_O31 = (1+redshift)*4960.295
     x0_O32 = (1+redshift)*5008.24
@@ -61,13 +55,15 @@ fudge_B = np.zeros(len(IDlist))
 fudge_A_err = np.zeros(len(IDlist))
 fudge_B_err = np.zeros(len(IDlist))
 
+Modignore = data.field('Module_ignore')
+
 
 for q in range(len(IDlist)):
     thisID = int(IDlist[q])
     thisz = z_guesslist[q]
     print('now doing id', thisID, q)
 
-    # thismod_ign = Modignore[q]
+    thismod_ign = Modignore[q]
 
     thisNclumps_spec = Nclumps_Y[q]
 
@@ -79,8 +75,8 @@ for q in range(len(IDlist)):
 
     obs_wav = data_1d.field('wavelength')  # in Angstroms
     for module in ['A', 'B']:
-        # if module == thismod_ign:
-        #     continue
+        if module == thismod_ign:
+            continue
         try:
             flux_tot = data_1d.field('flux_tot_%s' % module)
             flux_tot_err = data_1d.field('flux_tot_%s_err' % module)
