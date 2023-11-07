@@ -1,14 +1,24 @@
-import os
 from lmfit import Model
 from astropy.io import fits
 import numpy as np
-import copy
 import numpy
-from matplotlib import pyplot
 import numpy
 from astropy.cosmology import FlatLambdaCDM
 cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
 
+import matplotlib
+from matplotlib import pyplot
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+matplotlib.rc('text', usetex=True)
+matplotlib.rcParams.update({'font.size': 16})
+
+line_name_dict = {
+    5008.24: r'[OIII]$\lambda$5008',
+    4960.295: r'[OIII]$\lambda$4960',
+    4862.69: r'H$\beta$',
+    4341.69: r'H$\gamma$',
+    4364.44: r'[OIII]$\lambda$4364'
+}
 
 def gaussian(x, totflux, c, x0, sigma):
     return totflux*((sigma)**-1 * (2*np.pi)**-0.5 * np.exp(-(x-x0)**2/(2*sigma**2)))+c
@@ -176,19 +186,33 @@ for q in range(len(IDlist)):
 
         print(result.fit_report())
 
-        pyplot.plot(obs_wav[sel_include], flux_tot[sel_include],
+        
+        ###### FIGURE #####
+
+        fig, ax = pyplot.subplots()
+
+        ax.plot(obs_wav[sel_include], flux_tot[sel_include],
                     color='tab:blue', drawstyle='steps-mid')
-        pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
+        ax.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
                             flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
 
         xx = numpy.arange(min(obs_wav[sel_include]), max(
             obs_wav[sel_include]), 0.01)
-        pyplot.plot(xx, model.eval(result.params, x=xx),
+        ax.plot(xx, model.eval(result.params, x=xx),
                     lw=2, color='k', alpha=0.5)
-        pyplot.title(f'{good_fit=}')
-        pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                    (FIELD, thisID, int(thisline), module))
-        pyplot.clf()
+
+        this_line_name = line_name_dict[thisline]
+        ax.set_title(this_line_name)
+        ax.set_xlabel(r'$\lambda_\mathrm{obs}$ [\AA]')
+        ax.set_ylabel(r'$f_\lambda\cdot 10^{-18}$ [erg\,s$^{-1}$\,cm$^{-2}$\,\AA$^{-1}$]')
+
+        fig.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
+                    (FIELD, thisID, int(thisline), module),
+                    bbox_inches='tight', pad_inches=0.1, facecolor='w')
+        fig.clf()
+
+
+        ###################
 
         if thisNclumps_spec == 1:
             O3_5008_sigma = result.params['sigma'].value
@@ -302,19 +326,32 @@ for q in range(len(IDlist)):
 
             print(result.fit_report())
 
-            pyplot.plot(obs_wav[sel_include], flux_tot[sel_include],
+            ###### FIGURE #####
+
+            fig, ax = pyplot.subplots()
+
+            ax.plot(obs_wav[sel_include], flux_tot[sel_include],
                         color='tab:blue', drawstyle='steps-mid')
-            pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
+            ax.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
                                 flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
 
             xx = numpy.arange(min(obs_wav[sel_include]), max(
                 obs_wav[sel_include]), 0.01)
-            pyplot.plot(xx, model.eval(result.params, x=xx),
+            ax.plot(xx, model.eval(result.params, x=xx),
                         lw=2, color='k', alpha=0.5)
-            pyplot.title(f'{good_fit=}')
-            pyplot.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
-                        (FIELD, thisID, int(thisline), module))
-            pyplot.clf()
+
+            this_line_name = line_name_dict[thisline]
+            ax.set_title(this_line_name)
+            ax.set_xlabel(r'$\lambda_\mathrm{obs}$ [\AA]')
+            ax.set_ylabel(r'$f_\lambda\cdot 10^{-18}$ [erg\,s$^{-1}$\,cm$^{-2}$\,\AA$^{-1}$]')
+
+            fig.savefig(SAVE_FOLDER+'%s_ID_%s_line_%s_mod%s.png' %
+                        (FIELD, thisID, int(thisline), module),
+                        bbox_inches='tight', pad_inches=0.1, facecolor='w')
+            fig.clf()
+
+
+            ###################
 
             if thisline == 4862.69:
                 if thisNclumps_spec == 1:

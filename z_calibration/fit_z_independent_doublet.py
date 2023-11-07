@@ -5,28 +5,27 @@ import numpy as np
 from matplotlib import pyplot
 from astropy.cosmology import FlatLambdaCDM
 cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
-import pickle
 
 
 def gaussian(x, totflux, c, x0, sigma):
     return totflux*((sigma)**-1 * (2*np.pi)**-0.5 * np.exp(-(x-x0)**2/(2*sigma**2)))+c
 
 
-def gaussian_O3_withfudge(x, a, c, redshift, sigma, fudge):
-    x0_O31 = (1+redshift)*4960.295
+def gaussian_O3_withfudge(x, a, c, redshift, dz, sigma, fudge):
+    x0_O31 = (1+redshift + dz)*4960.295
     x0_O32 = (1+redshift)*5008.24
     return c + a*(np.exp(-(x-x0_O31)**2/(2*sigma**2))+c + 2.98*fudge*np.exp(-(x-x0_O32)**2/(2*sigma**2)))
 
 
 # if true, rescales the mean(err_1d) to be equal to the std(data_1d) with some outlier removal
 rescale_noise = False
-SAVE_FOLDER = '../spectra/SPECTRA_O3_FINAL/REDSHIFT_FIT/'
-SPECTRA_FOLDER = '../spectra/SPECTRA_O3_FINAL/ONED/'
+SAVE_FOLDER = '../../spectra/SPECTRA_O3_FINAL/REDSHIFT_FIT/'
+SPECTRA_FOLDER = '../../spectra/SPECTRA_O3_FINAL/ONED/'
 
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
-CATALOG = '../catalogs/DOUBLESEARCH.fits'
-SAVE_CATALOG = '../catalogs/COLA1_O3_fitted_redshift.fits'
+CATALOG = '../../catalogs/DOUBLESEARCH.fits'
+SAVE_CATALOG = './COLA1_O3_indep_redshift.fits'
 FIELD = 'COLA1'
 noise_rescale = 0.8008
 
@@ -49,6 +48,9 @@ redshift_O3doublet_A = np.zeros(len(IDlist))
 redshift_O3doublet_A_err = np.zeros(len(IDlist))
 redshift_O3doublet_B = np.zeros(len(IDlist))
 redshift_O3doublet_B_err = np.zeros(len(IDlist))
+
+dz_A = np.zeros(len(IDlist))
+dz_B = np.zeros(len(IDlist))
 
 fudge_A = np.zeros(len(IDlist))
 fudge_B = np.zeros(len(IDlist))
@@ -94,6 +96,7 @@ for q in range(len(IDlist)):
             model.set_param_hint('sigma', min=0.01, max=200)
             model.set_param_hint('c', min=-0.5, max=0.5)
             model.set_param_hint('redshift', min=thisz-0.02, max=thisz+0.02)
+            model.set_param_hint('dz', min=-0.02, max=0.02)
             model.set_param_hint('fudge', min=0.5, max=2.0)
             params = model.make_params(
                 a=0.1, c=0., redshift=thisz, sigma=10., fudge=1.0)
@@ -104,12 +107,14 @@ for q in range(len(IDlist)):
             model.set_param_hint('m1_sigma', min=7., max=35)
             model.set_param_hint('m1_c', min=-0.5, max=0.5)
             model.set_param_hint('m1_redshift', min=thisz-0.02, max=thisz+0.02)
+            model.set_param_hint('m1_dz', min=-0.02, max=0.02)
             model.set_param_hint('m1_fudge', min=0.95, max=1.05)
 
             model.set_param_hint('m2_a', min=0., max=200)
             model.set_param_hint('m2_sigma', min=7., max=35)
             model.set_param_hint('m2_c', min=-0.5, max=0.5)
             model.set_param_hint('m2_redshift', min=thisz-0.02, max=thisz+0.02)
+            model.set_param_hint('m2_dz', min=-0.02, max=0.02)
             model.set_param_hint('m2_fudge', min=0.95, max=1.05)
             params = model.make_params(m1_a=0.05, m1_c=0., m1_redshift=thisz+0.005, m1_sigma=10.,
                                        m1_fudge=1.0, m2_a=0.05, m2_c=0., m2_redshift=thisz-0.005, m2_sigma=10., m2_fudge=1.0)
@@ -126,18 +131,21 @@ for q in range(len(IDlist)):
             model.set_param_hint('m1_sigma', min=5., max=35)
             model.set_param_hint('m1_c', min=-0.5, max=0.5)
             model.set_param_hint('m1_redshift', min=thisz-0.04, max=thisz+0.02)
+            model.set_param_hint('m1_dz', min=-0.02, max=0.02)
             model.set_param_hint('m1_fudge', min=0.95, max=1.05)
 
             model.set_param_hint('m2_a', min=0., max=200)
             model.set_param_hint('m2_sigma', min=5., max=35)
             model.set_param_hint('m2_c', min=-0.5, max=0.5)
             model.set_param_hint('m2_redshift', min=thisz-0.02, max=thisz+0.02)
+            model.set_param_hint('m2_dz', min=-0.02, max=0.02)
             model.set_param_hint('m2_fudge', min=0.95, max=1.05)
 
             model.set_param_hint('m3_a', min=0., max=200)
             model.set_param_hint('m3_sigma', min=5., max=35)
             model.set_param_hint('m3_c', min=-0.5, max=0.5)
             model.set_param_hint('m3_redshift', min=thisz-0.02, max=thisz+0.02)
+            model.set_param_hint('m3_dz', min=-0.02, max=0.02)
             model.set_param_hint('m3_fudge', min=0.95, max=1.05)
             params = model.make_params(m1_a=0.5, m1_c=0., m1_redshift=thisz+0.005, m1_sigma=10., m1_fudge=1.0, m2_a=0.5, m2_c=0.,
                                        m2_redshift=thisz-0.005, m2_sigma=10., m2_fudge=1.0, m3_a=0.5, m3_c=0., m3_redshift=thisz-0.00, m3_sigma=10., m3_fudge=1.0)
@@ -155,48 +163,45 @@ for q in range(len(IDlist)):
         print(result.fit_report())
         if thisNclumps_spec == 1:
             redshift, redshifterr = result.params['redshift'].value, result.params['redshift'].stderr
+            this_dz = result.params['dz'].value
 
         if thisNclumps_spec > 1:
             redshift1, redshift1err = result.params['m1_redshift'].value, result.params['m1_redshift'].stderr
             redshift2, redshift2err = result.params['m2_redshift'].value, result.params['m2_redshift'].stderr
             tot1 = result.params['m1_a']*result.params['m1_sigma']
             tot2 = result.params['m2_a']*result.params['m2_sigma']
+            this_dz = result.params['m1_dz'].value
+
             if tot1 > tot2:
                 redshift, redshifterr = redshift1, redshift1err
             else:
                 redshift, redshifterr = redshift2, redshift2err
             print('TOT1,TOT2', tot1, tot2, redshift1, redshift2)
 
-        pyplot.plot(obs_wav[sel_include],
-                    flux_tot[sel_include], color='tab:blue')
-        pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
-                            flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
+        # pyplot.plot(obs_wav[sel_include],
+        #             flux_tot[sel_include], color='tab:blue')
+        # pyplot.fill_between(obs_wav[sel_include], -flux_tot_err[sel_include],
+        #                     flux_tot_err[sel_include], lw=0, alpha=0.4, color='tab:blue')
 
-        xx = np.arange(4920*(1+thisz), 5060*(1+thisz), 1.)
-        model_y = model.eval(result.params, x=xx)
-        pyplot.plot(xx, model_y, lw=2, color='k')
-        try:
-            pyplot.title(f'z={redshift:0.5f}({redshifterr:0.5f})')
-        except:
-            pyplot.title(f'z={redshift}({redshifterr})')
-        pyplot.savefig(
-            SAVE_FOLDER+'redshift_fit_O3doublet_%s_%s_mod%s.png' % (FIELD, thisID, module))
-        pyplot.clf()
-
-        # Save the residuals
-        residuals = np.interp(xx,  obs_wav[sel_include], flux_tot[sel_include],
-                              left=np.nan, right=np.nan) - model_y
-        res_save_name = SAVE_FOLDER+'redshift_fit_residuals_%s_%s_mod%s.pkl' % (FIELD, thisID, module)
-        with open(res_save_name, 'wb') as file:
-            pickle.dump(dict(xx=xx, residuals=residuals), file)
+        # xx = np.arange(4920*(1+thisz), 5060*(1+thisz), 1.)
+        # pyplot.plot(xx, model.eval(result.params, x=xx), lw=2, color='k')
+        # try:
+        #     pyplot.title(f'z={redshift:0.5f}({redshifterr:0.5f})')
+        # except:
+        #     pyplot.title(f'z={redshift}({redshifterr})')
+        # pyplot.savefig(
+        #     SAVE_FOLDER+'redshift_fit_O3doublet_%s_%s_mod%s.png' % (FIELD, thisID, module))
+        # pyplot.clf()
 
         if module == 'A':
             redshift_O3doublet_A[q] = redshift
             redshift_O3doublet_A_err[q] = redshifterr
+            dz_A[q] = this_dz
 
         if module == 'B':
             redshift_O3doublet_B[q] = redshift
             redshift_O3doublet_B_err[q] = redshifterr
+            dz_B[q] = this_dz
 
 
 col1 = fits.Column(name='z_O3doublet_A_n', format='D',
@@ -223,6 +228,8 @@ z_combined[sel_AB] = 0.5 * \
 
 
 col5 = fits.Column(name='z_O3doublet_combined_n', format='D', array=z_combined)
+col51 = fits.Column(name='dz_A', format='D', array=dz_A)
+col52 = fits.Column(name='dz_B', format='D', array=dz_B)
 
 col6 = fits.Column(name='fudge_A', format='D', array=fudge_A)
 col7 = fits.Column(name='fudge_A_err', format='D', array=fudge_A_err)
@@ -230,9 +237,8 @@ col7 = fits.Column(name='fudge_A_err', format='D', array=fudge_A_err)
 col8 = fits.Column(name='fudge_B', format='D', array=fudge_B)
 col9 = fits.Column(name='fudge_B_err', format='D', array=fudge_B_err)
 
-# col10 = fits.Column(name='Module_ignore', array=[''] * len(z_combined), format='A')
-
-new_cols = fits.ColDefs([col1, col2, col3, col4, col5, col6, col7, col8, col9])
+new_cols = fits.ColDefs([col1, col2, col3, col4, col5, col6, col7, col8, col9,
+                         col51, col52])
 
 hdu = fits.BinTableHDU.from_columns(orig_cols + new_cols)
 

@@ -2,7 +2,6 @@ import os
 from lmfit import Model
 from astropy.io import fits
 import numpy as np
-import copy
 import numpy
 from matplotlib import pyplot
 import numpy
