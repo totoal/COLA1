@@ -210,6 +210,12 @@ for q in range(len(IDlist)):
                     (FIELD, thisID, int(thisline), module),
                     bbox_inches='tight', pad_inches=0.1, facecolor='w')
         fig.clf()
+        # Save stuff
+        np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_obswav.npy', obs_wav)
+        np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_fluxtot.npy', flux_tot)
+        np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_fluxtoterr.npy', flux_tot_err)
+        np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_xx.npy', xx)
+        np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_yy.npy', model.eval(result.params, x=xx))
 
 
         ###################
@@ -349,6 +355,12 @@ for q in range(len(IDlist)):
                         (FIELD, thisID, int(thisline), module),
                         bbox_inches='tight', pad_inches=0.1, facecolor='w')
             fig.clf()
+            # Save stuff
+            np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_obswav.npy', obs_wav)
+            np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_fluxtot.npy', flux_tot)
+            np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_fluxtoterr.npy', flux_tot_err)
+            np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_xx.npy', xx)
+            np.save(f'{FIELD}_{thisID}_{int(thisline)}_mod{module}_yy.npy', model.eval(result.params, x=xx))
 
 
             ###################
