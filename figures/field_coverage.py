@@ -106,6 +106,6 @@ fig.subplots_adjust(hspace=0.0)
 # Save it
 savefig_path = '/home/alberto/cosmos/ista/COLA1/paper/figures'
 fig.savefig(f'{savefig_path}/COLA1_field_coverage.pdf', bbox_inches='tight', pad_inches=0.05,
-            # facecolor='w')
-            facecolor='w', dpi=200)
+            facecolor='w')
+            # facecolor='w', dpi=200)
 plt.close()
