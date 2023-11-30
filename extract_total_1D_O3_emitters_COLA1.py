@@ -2,7 +2,6 @@ import os
 from lmfit import Model
 from astropy.io import fits
 import numpy as np
-from astropy.convolution import convolve
 import numpy
 from astropy.io import fits as pyfits
 from matplotlib import pyplot
@@ -27,18 +26,25 @@ def gaussian(x, totflux, c, x0, sigma):
     return totflux*((sigma)**-1 * (2*np.pi)**-0.5 * np.exp(-(x-x0)**2/(2*sigma**2)))+c
 
 
-# if true, rescales the mean(err_1d) to be equal to the std(data_1d) with some outlier removal
 rescale_noise = False
+
+# This is the folder with the grism spectra
 FOLDER = '../spectra/SPECTRA_O3_FINAL/'
+
+# We will save the line profiles here
 SAVE_FOLDER = '../spectra/SPECTRA_O3_FINAL/OPTIMAL_PROFILES/'
+
+# We will save the 1D spectra here
 ONED_FOLDER = '../spectra/SPECTRA_O3_FINAL/ONED/'
 
-# did_you_create_the_folders?
+# Create the folders if they don't exist
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 os.makedirs(ONED_FOLDER, exist_ok=True)
 
+# This is your catalog.
 CATALOG = '../catalogs/DOUBLESEARCH.fits'
 FIELD = 'COLA1'
+
 noise_rescale = 0.8008
 
 # J1030: 0.715
@@ -49,6 +55,9 @@ IDlist = data.field('NUMBER_1')  # NUMBER for other fields than J0100
 # REDO=data.field('REDO_1D')
 
 z_guesslist = data.field('z_O3doublet')
+
+# This is a manual column that you might want to add manually in your catalog beforehand.
+# set them all to 1, check the fits visually and change the values manually if necessary.
 Nclumps_Y = data.field('Nclumps_Y')
 
 special_fit = [12655]
@@ -57,8 +66,6 @@ special_fit = [12655]
 for q in range(len(IDlist)):
     thisID = int(IDlist[q])
     thisz = z_guesslist[q]
-    # if REDO[q]==False:
-    # continue
 
     print('now doing id', thisID)
 
@@ -82,7 +89,7 @@ for q in range(len(IDlist)):
         data = hdu['EMLINE%s' % module].data
         errdata = hdu['ERR'].data * noise_rescale
 
-        # select region in 2D that contains the 5008 line ##Could also generalise to any other line
+        # Select region in 2D that contains the 5008 line ##Could also generalise to any other line
         if thisNclumps_Y == 1.:
             sel_wav = (wav_array > 5008.24*(1+thisz) - 5008.24*(1+thisz)*400/3E5) * \
                 (wav_array < 5008.24*(1+thisz) + 5008.24*(1+thisz)*250/3E5)  # this

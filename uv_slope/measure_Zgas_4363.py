@@ -85,29 +85,30 @@ H1atom = pn.RecAtom('H', 1)
 # stop
 
 
-for q in range(1000):
-    thisO3 = numpy.random.normal(O3, O3_err)
-    thisO3_4363 = numpy.random.normal(O3_4363, O3_4363_err)
-    thisHb = numpy.random.normal(Hb, Hb_err)
+N_samples = 5_000
 
-    thisO32 = numpy.random.normal(10., 3)  # an assumption of the O32 ratio
-    int_ratio = thisO3/thisO3_4363
+thisO3 = numpy.random.normal(O3, O3_err, size=N_samples)
+thisO3_4363 = numpy.random.normal(O3_4363, O3_4363_err, size=N_samples)
+thisHb = numpy.random.normal(Hb, Hb_err, size=N_samples)
 
-    # assume density ne=300 cm-3
-    T_1 = O3atom.getTemDen(int_ratio=int_ratio, den=300.,
-                           wave1=5007, wave2=4363) / 1E4
-    T_2 = -0.577+T_1*(2.065-0.498*T_1)
+thisO32 = numpy.random.normal(8., 3, size=N_samples)  # an assumption of the O32 ratio
+int_ratio = thisO3/thisO3_4363
 
-    OH_O3 = numpy.log10(1.25*thisO3/thisHb) + 6.2 + 1.251 / \
-        T_1 - 0.55*numpy.log10(T_1) - 0.014*T_1
-    OH_O2 = numpy.log10(1.25*thisO3/(thisHb*thisO32)) + 5.961 + 1.676/T_2 - \
-        0.4*numpy.log10(T_2) - 0.034*T_2 + \
-        numpy.log10(1+1.35*300*1E-4*T_2**-0.5)
+# assume density ne=300 cm-3
+T_1 = O3atom.getTemDen(int_ratio=int_ratio, den=300.,
+                        wave1=5007, wave2=4363) / 1E4
+T_2 = -0.577+T_1*(2.065-0.498*T_1)
 
-    SUM = numpy.log10(10**(OH_O3-12) + 10**(OH_O2-12))+12.
+OH_O3 = numpy.log10(1.25*thisO3/thisHb) + 6.2 + 1.251 / \
+    T_1 - 0.55*numpy.log10(T_1) - 0.014*T_1
+OH_O2 = numpy.log10(1.25*thisO3/(thisHb*thisO32)) + 5.961 + 1.676/T_2 - \
+    0.4*numpy.log10(T_2) - 0.034*T_2 + \
+    numpy.log10(1+1.35*300*1E-4*T_2**-0.5)
 
-    Te.append(T_1)
-    OH.append(SUM)
+SUM = numpy.log10(10**(OH_O3-12) + 10**(OH_O2-12))+12.
+
+Te = T_1
+OH = SUM
 
 
 print('Electron temperature', numpy.nanmedian(Te), -
@@ -144,12 +145,12 @@ import matplotlib.pyplot as plt
 
 tem = np.arange(5000, 18000, 30)
 
-# Plot
-plt.figure(1)
-for den in [1e2, 1e3, 1e4, 1e5]:
-    plt.semilogy(tem, line_ratio('O3', 4363, 5007, tem, den), label = 'Ne={0:.0e}'.format(den))
-plt.xlabel('T$_e$ [K]')
-plt.ylabel(r'[OIII] 4363/5007 $\AA$')
-plt.legend(loc=2)
+# # Plot
+# plt.figure(1)
+# for den in [1e2, 1e3, 1e4, 1e5]:
+#     plt.semilogy(tem, line_ratio('O3', 4363, 5007, tem, den), label = 'Ne={0:.0e}'.format(den))
+# plt.xlabel('T$_e$ [K]')
+# plt.ylabel(r'[OIII] 4363/5007 $\AA$')
+# plt.legend(loc=2)
 
-plt.show()
+# plt.show()

@@ -44,12 +44,12 @@ def continuum_and_lines(dummyx, norm, beta, redshift):
     # just exists in case we would want to add lines
     lines = numpy.zeros(numpy.shape(lamb))
 
-    sel_1500 = (lamb < ((1500)*(1+redshift)+15.)) * \
-        (lamb > ((1500)*(1+redshift)-15.))
+    # sel_1500 = (lamb < ((1500)*(1+redshift)+15.)) * \
+    #     (lamb > ((1500)*(1+redshift)-15.))
 
-    mean_1500 = numpy.nanmean(cont[sel_1500])
+    # mean_1500 = numpy.nanmean(cont[sel_1500])
 
-    fnu_1500 = mean_1500*(3.34E4*(1500.*(1+redshift))**2)  # erg/s/cm2/A
+    # fnu_1500 = mean_1500*(3.34E4*(1500.*(1+redshift))**2)  # erg/s/cm2/A
 
     sedmodel = lines+cont
     fn_F115W = 10**(-0.4*(get_obs_mag('JWST_NIRCam.F115W.dat',
@@ -73,7 +73,7 @@ thisfnu_F150W_err = 4.550855908814856
 thisfnu_F200W = 182.78079
 thisfnu_F200W_err = 2.6739856073287096
 
-thisz = 6.591
+thisz = 6.59165
 
 # NOTE, WE COULD ALSO JUST CHECK WHAT WE GET FROM F115W and F150W alone. Beta is defined as the slope at 1500 Angstrom rest-frame, and F200W is pretty far away from that
 
