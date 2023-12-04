@@ -126,7 +126,7 @@ if __name__ == '__main__':
     fit_slope_results = fit_UV_slope(cat)
 
 
-    col0 = fits.Column(name='NUMBER', format='D', array=cat[1].data['NUMBER'])
+    # col0 = fits.Column(name='NUMBER', format='D', array=cat[1].data['NUMBER'])
     col1 = fits.Column(name='beta', format='D', array=fit_slope_results[0])
     col2 = fits.Column(name='beta_err', format='D', array=fit_slope_results[1])
     col3 = fits.Column(name='norm', format='D', array=fit_slope_results[2])
@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
 
     orig_cols = cat[1].data.columns
-    new_cols = fits.ColDefs([col0, col1, col2, col3, col4])
+    new_cols = fits.ColDefs([col1, col2, col3, col4])
 
     hdu = fits.BinTableHDU.from_columns(orig_cols + new_cols)
 
