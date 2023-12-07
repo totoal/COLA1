@@ -53,12 +53,32 @@ for thisfilt in [200]:
     medstack = np.nanmedian(stack, axis=0)
 
 
-    # Jackknife to compute errors
+    ####### Now bootstrapping to compute errors
+    # (Lazy version)
+    N_boots = 100
+    stack = []
     
+    stacks_boots = []
+
+    for jjj in range(N_boots):
+        boot_IDs = np.random.choice(range(len(IDlist)), size=len(IDlist), replace=True)
+        for q in boot_IDs:
+            thisRA = RA[q]
+            thisDEC = DEC[q]
+            thisF200W = F200W[q]
+            multiply = med_F200W/thisF200W
+            data, header = create_cutout(directimage, thisRA, thisDEC, lx, ly)
+            stack.append(data/multiply)
+        
+        stacks_boots.append(np.nanmean(stack, axis=0))
+
+
+    errstack = np.nanstd(stacks_boots, axis=0)
+    medstack = np.nanmean(stacks_boots, axis=0)
 
 
     fits.writeto(f'{IMG_PATH}/star_cutouts/C1F_F{thisfilt}W_star_stack.fits', medstack,
                  overwrite=True)
-    # fits.writeto(f'{IMG_PATH}/star_cutouts/C1F_F{thisfilt}W_star_stack_err.fits', errstack,
-    #              overwrite=True)
+    fits.writeto(f'{IMG_PATH}/star_cutouts/C1F_F{thisfilt}W_star_stack_err.fits', errstack,
+                 overwrite=True)
     # fits.writeto('C1F_F%sW_wht.fits'%thisfilt,datatime,header,overwrite=True)
