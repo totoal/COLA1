@@ -111,13 +111,13 @@ xticklabels = np.arange(-500, 600 + 100, 100).astype(int)
 xticks = np.interp(xticklabels, Lya_wav_rel / w_Lya * 299792.458, Lya_wav_rel)
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
-ax.tick_params(direction='in', which='both')
+ax.tick_params(direction='in', which='both', labelsize=13)
 ax.yaxis.set_ticks_position('both')
 ax.xaxis.set_ticks_position('bottom')
 
 # Top x axis
 topax = ax.secondary_xaxis('top')
-topax.tick_params(direction='in', which='both')
+topax.tick_params(direction='in', which='both', labelsize=13)
 topax_xticks = np.arange(-2, 4, 1) - 0.67
 topax_xticklabels = [f'{xt + 1215.67:0.0f}' for xt in topax_xticks]
 topax.set_xticks(topax_xticks)

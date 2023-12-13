@@ -41,28 +41,29 @@ matplotlib.rcParams.update({'font.size': 16, 'font.family': 'serif',
 # O3_4363_err = 0.0435800316973457
 
 # COLA1 fluxes
-Hb = 4.102173791187896
-Hb_err = 0.16479177254799196
-O3_b = 8.485066991520519
-O3_b_err = 0.20556481443953625
-O3_r = 25.676083480108232
-O3_r_err = 0.38816374682561117
+Hb = 4.060629342372573
+Hb_err = 0.1594840449426366
+O3_b = 8.56083681675998
+O3_b_err = 0.1893554934640656
+O3_r = 25.658462103577893
+O3_r_err = 25.658462103577893
 
 O3 = 0.5*(2.98*O3_b + O3_r)
-O3_err = 0.5*((2.98*O3_b_err)**2 + O3_r**2)**0.5
+O3_err = 0.5*((2.98*O3_b_err)**2 + O3_r_err**2)**0.5
+# O3 = O3_b + O3_r
+# O3_err = (O3_b_err**2 + O3_r_err**2)**0.5
 
 Hg = 2.117971605396823
 Hg_err = 0.20597044573279671
 
-O3_4363 = 0.755969222734515
-O3_4363_err = 0.24577417533350124
+O3_4363 = 0.7700826229508199
+O3_4363_err = 0.23870988337173707
 
 
-HgHb = []
-for q in range(1000):
-    thisHb = numpy.random.normal(Hb, Hb_err)
-    thisHg = numpy.random.normal(Hg, Hg_err)
-    HgHb.append(thisHg/thisHb)
+thisHb = numpy.random.normal(Hb, Hb_err, size=5000)
+thisHg = numpy.random.normal(Hg, Hg_err, size=5000)
+
+HgHb = thisHg/thisHb
 
 print('Balmer decrement, Hg/Hb', numpy.nanmedian(HgHb), -
       (numpy.nanmedian(HgHb)-numpy.nanpercentile(HgHb, [16, 84])))
@@ -85,7 +86,7 @@ H1atom = pn.RecAtom('H', 1)
 # stop
 
 
-N_samples = 5_000
+N_samples = 5000
 
 thisO3 = numpy.random.normal(O3, O3_err, size=N_samples)
 thisO3_4363 = numpy.random.normal(O3_4363, O3_4363_err, size=N_samples)
@@ -99,9 +100,9 @@ T_1 = O3atom.getTemDen(int_ratio=int_ratio, den=300.,
                         wave1=5007, wave2=4363) / 1E4
 T_2 = -0.577+T_1*(2.065-0.498*T_1)
 
-OH_O3 = numpy.log10(1.25*thisO3/thisHb) + 6.2 + 1.251 / \
+OH_O3 = numpy.log10((1 + 1/2.98)*thisO3/thisHb) + 6.2 + 1.251 / \
     T_1 - 0.55*numpy.log10(T_1) - 0.014*T_1
-OH_O2 = numpy.log10(1.25*thisO3/(thisHb*thisO32)) + 5.961 + 1.676/T_2 - \
+OH_O2 = numpy.log10((1 + 1/2.98)*thisO3/(thisHb*thisO32)) + 5.961 + 1.676/T_2 - \
     0.4*numpy.log10(T_2) - 0.034*T_2 + \
     numpy.log10(1+1.35*300*1E-4*T_2**-0.5)
 
