@@ -40,7 +40,7 @@ O3_5008_flx_B = np.load(f'{COLA1_fluxes_dir}/COLA1_9269_5008_modB_fluxtot.npy')
 fig, ax = plt.subplots(figsize=(6, 4))
 
 # Define relative wavelength limits
-wav_lim_low, wav_lim_high = -2.1, 2.5
+wav_lim_low, wav_lim_high = -2.2, 2.6
 
 
 ## Plot the Lya profile
@@ -74,18 +74,19 @@ z_Hbeta_B = 6.589786
 
 # Line styles
 ax.axvline(w_Lya * ((1 + z_O3_5008_A) / (1 + z_Lya_sys) - 1),
-          lw=1.5, ls='--', color='C0', zorder=53)
+          lw=2, ls='--', color='C0', zorder=53)
 ax.axvline(w_Lya * ((1 + z_O3_4960_A) / (1 + z_Lya_sys) - 1),
-          lw=1.5, ls='--', color='C1', zorder=51)
+          lw=2, ls='--', color='C1', zorder=51)
 ax.axvline(w_Lya * ((1 + z_Hbeta_A) / (1 + z_Lya_sys) - 1),
-          lw=1.5, ls='--', color='C2', zorder=52)
+          lw=2, ls='--', color='C2', zorder=52)
 
 ax.axvline(w_Lya * ((1 + z_O3_5008_B) / (1 + z_Lya_sys) - 1),
-          lw=1.5, ls='-.', color='C0', zorder=53)
+          lw=2, ls='-.', color='C0', zorder=53)
 ax.axvline(w_Lya * ((1 + z_O3_4960_B) / (1 + z_Lya_sys) - 1),
-          lw=1.5, ls='-.', color='C1', zorder=52)
+          lw=2, ls='-.', color='C1', zorder=52)
 ax.axvline(w_Lya * ((1 + z_Hbeta_B) / (1 + z_Lya_sys) - 1),
-          lw=1.5, ls='-.', color='C2', zorder=51)
+          lw=2, ls='-.', color='C2', zorder=51)
+
 
 # Dummy lines for legend
 ax.axvline(100, color='C0', lw=2, label=r'[OIII]$_{\lambda 5008}$')
@@ -99,9 +100,9 @@ ax.axvline(100, color='dimgray', lw=1.5, ls='-.', label='Module B')
 ax.axhline(0, c='k', ls='-', zorder=-999, lw=1)
 
 # Legend
-ax.legend(fontsize=10, markerfirst=True, alignment='right',
+ax.legend(fontsize=10, markerfirst=True, alignment='left',
           title='Grism line centroids', title_fontsize=11.5,
-          frameon=False, loc=1)
+          frameon=False, loc='upper left')
 
 
 ax.set_xlim(wav_lim_low, wav_lim_high)

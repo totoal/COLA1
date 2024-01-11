@@ -62,16 +62,21 @@ def continuum_and_lines(dummyx, norm, beta, redshift):
     return numpy.array([fn_F115W, fn_F150W, fn_F200W])
 
 
-thisfnu_F115W = 222.75876
-thisfnu_F115W_err = 5.006681561755274
+# thisfnu_F115W = 222.75876
+# thisfnu_F115W_err = 5.006681561755274
 
+# thisfnu_F150W = 161.87422
+# thisfnu_F150W_err = 4.550855908814856
 
-thisfnu_F150W = 161.87422
-thisfnu_F150W_err = 4.550855908814856
+# thisfnu_F200W = 182.78079
+# thisfnu_F200W_err = 2.6739856073287096
 
-
-thisfnu_F200W = 182.78079
-thisfnu_F200W_err = 2.6739856073287096
+thisfnu_F115W = 198.3188560676575
+thisfnu_F115W_err = 6.669192861020064
+thisfnu_F150W = 141.42336194753648
+thisfnu_F150W_err = 5.551065682766777
+thisfnu_F200W = 157.2446328163147
+thisfnu_F200W_err = 4.207247652390742 * 999999999
 
 thisz = 6.59165
 
