@@ -73,7 +73,7 @@ def fit_UV_slope(cat):
 
         thisfnu_F115W_err = data['F115W_AUTO_enu'][iii]
         thisfnu_F150W_err = data['F150W_AUTO_enu'][iii]
-        thisfnu_F200W_err = data['F200W_AUTO_enu'][iii]
+        thisfnu_F200W_err = data['F200W_AUTO_enu'][iii] * 9999999.
 
         thisz = data['z_O3doublet_combined_n'][iii]
 
@@ -90,8 +90,8 @@ def fit_UV_slope(cat):
         dx = 2.  # this is just a dummy
 
         model = Model(continuum_and_lines)
-        model.set_param_hint('norm', min=0.001, max=40.)
-        model.set_param_hint('beta', min=-4., max=0.)
+        model.set_param_hint('norm', min=0.0001, max=400.)
+        model.set_param_hint('beta', min=-6., max=1)
         model.set_param_hint('redshift', min=thisz-0.005, max=thisz+0.005)
 
 
@@ -133,5 +133,5 @@ if __name__ == '__main__':
 
     hdu = fits.BinTableHDU.from_columns(orig_cols + new_cols)
 
-    SAVE_CATALOG = 'UV_slopes_COLA1_field.fits'
+    SAVE_CATALOG = 'UV_slopes_COLA1_field_2fil.fits'
     hdu.writeto(SAVE_CATALOG, overwrite=True)
