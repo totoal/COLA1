@@ -92,7 +92,8 @@ thisO3 = numpy.random.normal(O3, O3_err, size=N_samples)
 thisO3_4363 = numpy.random.normal(O3_4363, O3_4363_err, size=N_samples)
 thisHb = numpy.random.normal(Hb, Hb_err, size=N_samples)
 
-thisO32 = numpy.random.normal(8., 3, size=N_samples)  # an assumption of the O32 ratio
+# thisO32 = numpy.random.normal(8., 3, size=N_samples)  # an assumption of the O32 ratio
+thisO32 = 180.
 int_ratio = thisO3/thisO3_4363
 
 # assume density ne=300 cm-3
