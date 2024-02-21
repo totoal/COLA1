@@ -21,7 +21,7 @@ fig, ax = plt.subplots(2, 1, figsize=(12, 9.5),
 [ax0, ax1] = ax
 
 
-RGBFILE = '/home/alberto/cosmos/ista/COLA1/images/stiff_bin1_cola1.tif'
+RGBFILE = '/home/alberto/portatilHP/cosmos/ista/COLA1/images/stiff_bin1_cola1.tif'
 
 img = Image.open(RGBFILE)
 img = np.asarray(img)
@@ -48,7 +48,7 @@ ax0.set_ylabel('Angular separation [arcsecond]')
 
 
 # Load the error cube
-path_to_errorcube = '/home/alberto/cosmos/ista/COLA1/images/COLA1_spec_ERR_cube_v2.fits'
+path_to_errorcube = '/home/alberto/portatilHP/cosmos/ista/COLA1/images/COLA1_spec_ERR_cube_v2.fits'
 errcube = fits.open(path_to_errorcube)[0]
 # Shape of errcube is: (1200, 430, 175)
 # The spatial dimensions are (430, 175), dimensions of the image compressed 40 times
@@ -64,6 +64,8 @@ min_stretched = stretch([np.nanmin(errplane_COLA1)])
 
 cbar = ax1.imshow(stretch(errplane_COLA1[:, ::-1].T) / min_stretched, aspect='auto',
                   vmin=1, vmax=4, rasterized=True, cmap='magma')
+
+print('Surveyed area total:', np.sum(np.any(errcube.data > 0, axis=2)) * (0.03 / 60 * 40) ** 2)
 
 # Color bar inside ax1
 cbar_ax = ax1.inset_axes(bounds=[0.006, 0.05, 0.012, 0.9])
@@ -104,7 +106,7 @@ ax1.set_xlabel('Angular separation [arcsecond]')
 fig.subplots_adjust(hspace=0.0)
 
 # Save it
-savefig_path = '/home/alberto/cosmos/ista/COLA1/paper/figures'
+savefig_path = '/home/alberto/portatilHP/cosmos/ista/COLA1/paper/figures'
 fig.savefig(f'{savefig_path}/COLA1_field_coverage.pdf', bbox_inches='tight', pad_inches=0.05,
             facecolor='w')
             # facecolor='w', dpi=200)
