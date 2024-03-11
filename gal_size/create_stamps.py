@@ -19,7 +19,7 @@ def create_cutout(directimage, RA, DEC, lx, ly):
 
 
 # OPEN CATALOG
-CATALOG = '/home/alberto/cosmos/ista/COLA1/catalogs/C1F_stars.fits'
+CATALOG = '/home/alberto/cosmos/COLA1/catalogs/C1F_stars.fits'
 with fits.open(CATALOG) as hdul:
     orig_table = hdul[1].data
     orig_cols = orig_table.columns
@@ -35,7 +35,7 @@ med_F200W = np.nanmedian(F200W)
 lx, ly = 200, 200
 
 
-IMG_PATH = '/home/alberto/cosmos/ista/COLA1/images'
+IMG_PATH = '/home/alberto/cosmos/COLA1/images'
 
 for thisfilt in [200]:
     directimage = f'{IMG_PATH}/cola1_F{thisfilt}W.fits'
@@ -59,6 +59,7 @@ for thisfilt in [200]:
     stack = []
     
     stacks_boots = []
+    stacks_boots_std = []
 
     for jjj in range(N_boots):
         boot_IDs = np.random.choice(range(len(IDlist)), size=len(IDlist), replace=True)
@@ -71,6 +72,7 @@ for thisfilt in [200]:
             stack.append(data/multiply)
         
         stacks_boots.append(np.nanmean(stack, axis=0))
+        stacks_boots_std.append(np.nanstd(stack, axis=0))
 
 
     errstack = np.nanstd(stacks_boots, axis=0)
@@ -82,3 +84,7 @@ for thisfilt in [200]:
     fits.writeto(f'{IMG_PATH}/star_cutouts/C1F_F{thisfilt}W_star_stack_err.fits', errstack,
                  overwrite=True)
     # fits.writeto('C1F_F%sW_wht.fits'%thisfilt,datatime,header,overwrite=True)
+
+np.save(f'{IMG_PATH}/star_cutouts/C1F_F{thisfilt}W_star_stack_list.npy', stacks_boots)
+np.save(f'{IMG_PATH}/star_cutouts/C1F_F{thisfilt}W_star_stack_std_list.npy', stacks_boots_std)
+

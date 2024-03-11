@@ -55,7 +55,7 @@ with fits.open(CATALOG) as hdul:
 cat = fits.open(CATALOG)
 
 data = cat[1].data
-IDlist = data.field('NUMBER_1')  # NUMBER for other fields than J0100
+IDlist = data.field('NUMBER_1')
 
 
 z_guesslist = data.field('z_O3doublet_combined_n')
